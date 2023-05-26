@@ -46,7 +46,7 @@ const registration = (req, res) => {
   req.session.body = req.body;
   userHelper.findSignUp(req.body).then(async (response) => {
     if (response.status) {
-      // userHelper.sendOtp(mob);
+      userHelper.sendOtp(mob);
       res.redirect("/user_otp");
     } else {
       console.log(response.message);
@@ -67,19 +67,19 @@ const userOtp = (req, res) => {
 };
 
 const checkOtp = async (req, res) => {
-  let response={}
-  // const otp = req.body.otp;
-  // const mob = req.session.body.phone;
-  // let response = await client.verify.v2
-  //   .services(verifySid)
-  //   .verificationChecks.create({ to: `+91${mob}`, code: otp });
+  // let response={}
+  const otp = req.body.otp;
+  const mob = req.session.body.phone;
+  let response = await client.verify.v2
+    .services(verifySid)
+    .verificationChecks.create({ to: `+91${mob}`, code: otp });
   response.valid = true
   if (response.valid) {
     const user = await userHelper.signUp(req.session.body);
     req.flash("successMsg", "User created Successfully");
     let maxAge = 60 * 60 * 24 * 3 * 1000
     const accessToken = userHelper.createJwtToken(user)
-    res.cookie("jwtToken", accessToken, {maxAge,httpOnly:true})
+    res.cookie("jwtToken", accessToken, { maxAge, httpOnly: true })
     req.session.isUserLoggedIn = true;
     req.session.userName = user.name;
     res.redirect("/");

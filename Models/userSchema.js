@@ -20,6 +20,10 @@ var userSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
+    isBlocked: {
+        type: Boolean,
+        required:true,
+    }
 });
 
 //Export the model

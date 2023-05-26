@@ -75,7 +75,7 @@
 .home-section{
   position: relative;
   background: #f5f5f5;
-  min-height: 100vh;
+  min-height: 11vh;
   width: calc(100% - 240px);
   left: 240px;
   transition: all 0.5s ease;
@@ -176,6 +176,13 @@ nav .profile-details i{
   position: relative;
   padding-top: 104px;
 }
+
+.home-content{
+  margin-left: 233px;
+  margin-top: 15px;
+}
+
+
 .home-content .overview-boxes{
   display: flex;
   align-items: center;

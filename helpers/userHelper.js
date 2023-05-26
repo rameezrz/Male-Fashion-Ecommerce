@@ -40,6 +40,7 @@ module.exports = {
           phone,
         });
         newUser.password = await bcrypt.hash(password, 10);
+        newUser.isBlocked = false
         newUser.save().then((user) => {
           resolve(user)
         })
