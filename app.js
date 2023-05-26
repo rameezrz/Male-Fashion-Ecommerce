@@ -4,6 +4,8 @@ const dotenv = require("dotenv");
 const flash = require("connect-flash");
 const mongoose = require("mongoose");
 const session = require('express-session')
+const cookieParser = require('cookie-parser')
+const nocache = require('nocache')
 const app = express();
 
 //environment variables
@@ -13,6 +15,13 @@ app.use(express.urlencoded({ extended: true }));
 
 //view engine
 app.set("view engine", "ejs");
+
+//cookie Parser
+app.use(cookieParser())
+
+
+//no cache
+app.use(nocache())
 
 app.use(session({
     secret: "secret",

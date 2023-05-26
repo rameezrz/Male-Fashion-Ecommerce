@@ -21,18 +21,18 @@
 
                                     <div class="form-outline mb-3">
                                         <input type="text" id="form3Example8" placeholder="Full Name"
-                                            class="form-control " name="name" />
+                                            class="form-control " name="name" value="<%= typeof name != 'undefined' ? name : '' %>"/>
                                     </div>
 
                                     <div class="form-outline mb-3">
                                         <input type="text" id="form3Example9" placeholder="Email"
-                                            class="form-control" name="email" onkeyup="validateEmail()" />
+                                            class="form-control" name="email" onkeyup="validateEmail()" value="<%= typeof email != 'undefined' ? email : '' %>"/>
                                         <span id="email-error"></span>
                                     </div>
 
                                     <div class="form-outline mb-3">
                                         <input type="text" id="form3Example90" placeholder="Phone"
-                                            class="form-control " name="phone" onkeyup="validatePhone()" />
+                                            class="form-control " name="phone" onkeyup="validatePhone()" value="<%= typeof phone != 'undefined' ? phone : '' %>"/>
                                         <span id="phone-error"></span>
                                     </div>
 

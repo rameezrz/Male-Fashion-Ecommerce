@@ -1,5 +1,5 @@
-<section class="h-100 bg-light ">
-    <div class="container py-3">
+<section class="h-100 bg-light d-flex align-items-center ">
+    <div class="container py-3 ">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col">
                 <div class="card card-registration my-2 ">
@@ -10,27 +10,15 @@
                                 style="border-top-left-radius: .25rem; border-bottom-left-radius: .25rem;" />
                         </div>
                         <div class="col-xl-6 d-flex align-items-center justify-content-center">
-                            <form action="/">
+                            <form action="/user_signin" method="post">
                             <div class="card-body text-black">
                                 <h3 class="mb-4">Login to your account</h3>
-
-
-
-
-
-                               
-
-
-
-
-
+                                <%- include ("../partials/messages")  %>
                                 <div class="form-outline mb-3">
                                     <label class="form-label" for="form3Example9">Email</label>
                                     <input type="text" id="form3Example9" placeholder="balamia@gmail.com"
-                                        class="form-control" />
+                                        class="form-control" name="email"/>
                                 </div>
-
-                               
 
                                 <div class="form-outline mb-3">
                                     <label class="d-flex justify-content-between" for="form3Example99" id="password-label-1">
@@ -38,7 +26,7 @@
                                         <img src="./img/icon/hide.svg" alt="">
                                     </label>
                                     <input type="password" id="form3Example99"
-                                        class="form-control " placeholder="*******"/>
+                                        class="form-control " placeholder="*******" name="password"/>
                                 </div>
 
                                 
