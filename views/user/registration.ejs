@@ -21,18 +21,18 @@
 
                                     <div class="form-outline mb-3">
                                         <input type="text" id="form3Example8" placeholder="Full Name"
-                                            class="form-control " name="name" value="<%= typeof name != 'undefined' ? name : '' %>"/>
+                                            class="form-control " name="name" value="<%= typeof name != 'undefined' ? name : '' %>" required/>
                                     </div>
 
                                     <div class="form-outline mb-3">
                                         <input type="text" id="form3Example9" placeholder="Email"
-                                            class="form-control" name="email" onkeyup="validateEmail()" value="<%= typeof email != 'undefined' ? email : '' %>"/>
+                                            class="form-control" name="email" onkeyup="validateEmail()" value="<%= typeof email != 'undefined' ? email : '' %>" required/>
                                         <span id="email-error"></span>
                                     </div>
 
                                     <div class="form-outline mb-3">
                                         <input type="text" id="form3Example90" placeholder="Phone"
-                                            class="form-control " name="phone" onkeyup="validatePhone()" value="<%= typeof phone != 'undefined' ? phone : '' %>"/>
+                                            class="form-control " name="phone" onkeyup="validatePhone()" value="<%= typeof phone != 'undefined' ? phone : '' %>" required/>
                                         <span id="phone-error"></span>
                                     </div>
 
@@ -66,4 +66,4 @@
     </div>
 </section>
 
-<script src="/user/js/validatin.js"></script>
+<script src="/user/js/validation.js"></script>

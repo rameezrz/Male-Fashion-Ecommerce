@@ -61,6 +61,11 @@ module.exports = {
           response.message = "User Doesn't Exist"
           resolve(response)
         }
+        if (user.isBlocked) {
+          response.status = false
+          response.message = "Account Blocked. Contact Admin!!!"
+          resolve(response)
+        }
         const dbPassword = user.password
         await bcrypt.compare(password, dbPassword).then((match) => {
           if (!match) {

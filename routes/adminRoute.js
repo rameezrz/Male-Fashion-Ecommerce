@@ -1,34 +1,41 @@
 const express = require('express')
 const router = express.Router()
 const adminController = require('../controllers/adminController')
+const validateToken = require("../middlewares/jwtAuthAdmin")
 
-router.get('/admin_login', (req, res) => {
-    res.send("admin Login")
-})
+//Auth Routes
+router.get('/admin_login', adminController.displayLogin)
+router.post('/admin_login', adminController.postLogin)
 
-router.get('/admin_panel', (req, res) => {
-    res.render('admin/indexAdmin')
-})
-
-router.get('/admin_panel/user_management', adminController.displayUsers)
-router.get('/admin_panel/block_user/:id',adminController.blockUser)
-router.get('/admin_panel/unblock_user/:id', adminController.UnblockUser)
-
-router.get('/admin_panel/categories',adminController.displayCategories)
-router.post('/admin_panel/add_category',adminController.addCategory)
-router.post('/admin_panel/add_subCategory', adminController.addSubCategory)
+//Dashboard
+router.get('/admin_panel',validateToken, adminController.dashboard)
 
 
+//User Management Routes
+router.get('/admin_panel/user_management', validateToken, adminController.displayUsers)
+router.get('/admin_panel/block_user/:id',validateToken,adminController.blockUser)
+router.get('/admin_panel/unblock_user/:id', validateToken,adminController.UnblockUser)
 
-router.get('/admin_panel/products', (req, res) => {
-    res.render('admin/products')
-})
+//Category Routes
+router.get('/admin_panel/addCategories',validateToken,adminController.displayAddCategories)
+router.get('/admin_panel/addSubCategories',validateToken,adminController.displayAddSubCategories)
+router.post('/admin_panel/add_category',validateToken,adminController.addCategory)
+router.get('/admin_panel/delete_category/:id',validateToken,adminController.deleteCategory)
+router.post('/admin_panel/add_subCategory', validateToken, adminController.addSubCategory)
+router.get('/admin_panel/delete_subCategory/:id',validateToken,adminController.deleteSubCategory)
+router.post('/admin_panel/get_subCategory',validateToken,adminController.getSubCategory)
 
+//Product Routes
+router.get('/admin_panel/products',validateToken, adminController.displayProducts)
+router.get('/admin_panel/add_product',validateToken,adminController.displayAddProduct)
+router.post('/admin_panel/add_product',validateToken,adminController.addProduct)
+router.get('/admin_panel/edit_product/:id',validateToken,adminController.displayEditProduct)
+router.post('/admin_panel/edit_product',validateToken,adminController.editProduct)
+router.get('/admin_panel/delete_product/:id',validateToken,adminController.deleteProduct)
+router.get('/admin_panel/unblock_product/:id', validateToken, adminController.unblockProduct)
 
+//Logout 
+router.get('/adminLogout',validateToken,adminController.logout)
 
-
-
-
-
-
+//Export
 module.exports = router

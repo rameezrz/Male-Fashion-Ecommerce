@@ -8,7 +8,7 @@ module.exports = {
         let response = {}
         return new Promise(async(resolve, reject) => {
             try {
-                const isCategory = await Category.findOne({ name: category })
+                const isCategory = await Category.findOne({ name: { $regex: new RegExp(category, 'i') } })
             if (isCategory) {
                 response.status = false
                 response.message = `${category} already exists!!!`
@@ -33,7 +33,7 @@ module.exports = {
         let response = {}
         return new Promise(async(resolve, reject) => {
             try {
-                const isSubCategory = await SubCategory.findOne({ name: subCategory })
+                const isSubCategory = await SubCategory.findOne({ name: { $regex: new RegExp(subCategory, 'i') } })
                 if (isSubCategory) {
                     response.status = false
                     response.message = `${subCategory} already exists!!!`
@@ -46,6 +46,46 @@ module.exports = {
                         response.subCategory = subCategory
                         resolve(response) 
                     })
+                }
+            } catch (error) {
+                reject(error)
+            }
+        })
+    },
+
+    deleteCategory: (id) => {
+        let response = {}
+        return new Promise(async(resolve, reject) => {
+            try {
+                const deleteCategory = await Category.deleteOne({ _id: id })
+                if (deleteCategory) {
+                    response.status = true
+                    response.message = `Category Deleted Successfully`
+                    resolve(response)
+                } else {
+                    response.status = false
+                    response.message = `Error occured`
+                    resolve(response)
+                }
+            } catch (error) {
+                reject(error)
+            }
+        })
+    },
+
+    deleteSubCategory: (id) => {
+        let response = {}
+        return new Promise(async(resolve, reject) => {
+            try {
+                const deleteSubCategory = await SubCategory.deleteOne({ _id: id })
+                if (deleteSubCategory) {
+                    response.status = true
+                    response.message = `Sub-Category Deleted Successfully`
+                    resolve(response)
+                } else {
+                    response.status = false
+                    response.message = `Error occured`
+                    resolve(response)
                 }
             } catch (error) {
                 reject(error)

@@ -1,0 +1,92 @@
+
+<div class="col d-flex justify-content-center">
+  <form class="form w-50" action="/admin_panel/edit_product" method="POST" enctype="multipart/form-data">
+    <h4>Edit Product</h4>
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label" for="basic-default-name">Name</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" placeholder="Product Title" name="productName" value="<%= product.productName%>" />
+        <input type="text" class="form-control" placeholder="Product Title" name="id" value="<%= product._id%>" hidden/>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label" for="basic-default-name">Brand</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" placeholder="Product Brand" name="brand" value="<%= product.brand%>" />
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label" for="basic-default-name">Product Price</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="productPrice"  placeholder="Product Price" name="productPrice" value="<%= product.productPrice%>" />
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label" for="basic-default-name">Sale Price</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" id="salePrice"  placeholder="Product Sale Price" name="salePrice" value="<%= product.salePrice%>" />
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label" for="basic-default-name">Stock</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" placeholder="Product Stock" name="stock" value="<%= product.stock%>" />
+      </div>
+    </div>
+    <div class="row mb-3">
+      <label class="col-sm-2 col-form-label" for="basic-default-message">Description</label>
+      <div class="col-sm-10">
+        <textarea
+        placeholder="Product Description" name="description"  class="w-100 form-control"
+        ><%= product.description %></textarea>
+      </div>
+    </div>
+    <div class="form-group mb-3">
+      <label for="selectBox" class="col-form-label">Categories</label>
+      <select class=" form-control" name="category" id="categorySelect">
+        <% categories.forEach((category)=>{ %>
+          <option value="<%=category._id  %>"> <%= category.name %></option>
+      <% }); %>
+      </select>
+    </div>
+    <div class="form-group mb-3">
+      <label for="selectBox" class="col-form-label">Choose Categories</label>
+      <select class=" form-control" name="subCategory" id="subCategorySelect">
+          <option value="Choose"> Choose</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="imageField" class="mb-3 col-form-label">Images</label>
+      <div class="row row-cols-1 row-cols-md-3 g-4 mb-3" >
+        <% product.images.forEach((image)=>{ %>
+          <div class="col" style="width: 20%;">
+            <div class="card h-100">
+              <img style="max-width: 100%" src="/admin/productImgMulter/<%=image %>" class="img-thumbnail" alt="...">
+            </div>
+          </div>
+       <% }) %>
+      </div>
+      <input type="file" class="form-control" id="imageField"  placeholder="Product Images" name="images" multiple>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+<script src="/admin/js/productFormValidation.js"></script>
+
+<script>
+  $('#categorySelect').on('change', function() {
+        var categoryId = $(this).val(); 
+        var subcategorySelect = $('#subCategorySelect'); 
+          $.ajax({
+          url: '/admin_panel/get_subCategory', 
+          method: 'POST',
+          data: { categoryId}, 
+          success: function(subcategories) {
+               subcategorySelect.empty();
+            $.each(subcategories, function(index, subcategory) {
+              subcategorySelect.append($('<option>').val(subcategory._id).text(subcategory.name));
+            });
+          }
+     });
+});
+</script>
