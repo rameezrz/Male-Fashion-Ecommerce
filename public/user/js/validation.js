@@ -1,12 +1,8 @@
-
-var emailError = document.getElementById('email-error');
-var phoneError  = document.getElementById('phone-error');
-var pass1Error  = document.getElementById('pass1-error');
-var pass2Error  = document.getElementById('pass2-error');
-var submitError = document.getElementById('submit-error');
-
-
-
+var emailError = document.getElementById("email-error");
+var phoneError = document.getElementById("phone-error");
+var pass1Error = document.getElementById("pass1-error");
+var pass2Error = document.getElementById("pass2-error");
+var submitError = document.getElementById("submit-error");
 
 function validateEmail() {
   var emailField = document.getElementById("form3Example9").value;
@@ -24,7 +20,7 @@ function validateEmail() {
     emailError.classList.add("text-danger");
     return false;
   } else {
-    emailError.innerHTML = '';
+    emailError.innerHTML = "";
     return true;
   }
 }
@@ -45,36 +41,37 @@ function validatePhone() {
     phoneError.classList.add("text-danger");
     return false;
   } else {
-    phoneError.innerHTML = '';
+    phoneError.innerHTML = "";
     return true;
   }
 }
 
-
-
 function validatePassword1() {
   var passwordField = document.getElementById("form3Example98").value;
+  let strongPassword = new RegExp('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})')
 
-  var required = 6;
-
-  var left = required - passwordField.length;
-
-  if (left > 0) {
-    pass1Error.innerHTML = left + "more characters required";
+  if (strongPassword.test(passwordField)) {
+    pass1Error.innerHTML = "";
+    return true;
+  } else if (passwordField.length === 0) {
+    pass1Error.innerHTML = "";
+    return true;
+  } else {
+    pass1Error.innerHTML = "Invalid Password";
     pass1Error.classList.remove("text-success");
     pass1Error.classList.add("text-danger");
     return false;
   }
-  pass1Error.innerHTML = '';
-  return true;
+  
 }
+ 
 
 function validatePassword2() {
   var passwordField = document.getElementById("form3Example98").value;
   var passwordField2 = document.getElementById("form3Example99").value;
 
   if (passwordField == passwordField2) {
-    var match = true
+    var match = true;
   }
 
   if (!match) {
@@ -83,17 +80,20 @@ function validatePassword2() {
     pass2Error.classList.add("text-danger");
     return false;
   }
-  pass2Error.innerHTML = '';
+  pass2Error.innerHTML = "";
   return true;
 }
 
 function validateForm() {
-  if ( !validateEmail() || !validatePhone() || !validatePassword1() || !validatePassword2()) {
+  if (
+    !validateEmail() ||
+    !validatePhone() ||
+    !validatePassword1() ||
+    !validatePassword2()
+  ) {
     submitError.innerHTML = "Please fix these error to submit";
     submitError.classList.add("text-danger");
     submitError.classList.add("text-center");
     return false;
   }
 }
-
-

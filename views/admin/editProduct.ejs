@@ -44,15 +44,16 @@
     <div class="form-group mb-3">
       <label for="selectBox" class="col-form-label">Categories</label>
       <select class=" form-control" name="category" id="categorySelect">
+        <option value="<%= selectedCategory  %>"> <%= selectedCategory %></option>
         <% categories.forEach((category)=>{ %>
           <option value="<%=category._id  %>"> <%= category.name %></option>
       <% }); %>
       </select>
     </div>
     <div class="form-group mb-3">
-      <label for="selectBox" class="col-form-label">Choose Categories</label>
+      <label for="selectBox" class="col-form-label">Choose Sub-Categories</label>
       <select class=" form-control" name="subCategory" id="subCategorySelect">
-          <option value="Choose"> Choose</option>
+          <option value="<%= selectedSubCategory._id  %>"> <%= selectedSubCategory  %></option>
       </select>
     </div>
     <div class="mb-3">

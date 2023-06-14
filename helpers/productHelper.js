@@ -2,7 +2,7 @@ const Product = require("../Models/productSchema");
 
 module.exports = {
   addProduct: (productData, imageDetails) => {
-    const { productName,brand, productPrice, salePrice, stock, description } =
+    const { productName, brand, productPrice, salePrice, stock, description } =
       productData;
     let response = {};
     return new Promise(async (resolve, reject) => {
@@ -38,11 +38,11 @@ module.exports = {
     });
   },
 
-  editProduct: (productData,imageDetails) => { 
-    const { productName,brand, productPrice, salePrice, stock, description } =
+  editProduct: (productData, imageDetails) => {
+    const { productName, brand, productPrice, salePrice, stock, description } =
       productData;
     return new Promise(async (resolve, reject) => {
-      try {  
+      try {
         let updatedProduct;
         if (imageDetails.length > 0) {
           updatedProduct = await Product.updateOne(
@@ -57,7 +57,8 @@ module.exports = {
               images: imageDetails.map((image) => image.filename),
               category: productData.category,
               subCategory: productData.subCategory,
-            });
+            }
+          );
         } else {
           updatedProduct = await Product.updateOne(
             { _id: productData.id },
@@ -70,9 +71,10 @@ module.exports = {
               description,
               category: productData.category,
               subCategory: productData.subCategory,
-            });
+            }
+          );
         }
-        
+
         let response = {};
         if (updatedProduct) {
           response = {
@@ -80,7 +82,7 @@ module.exports = {
             message: "Product Edited Successfully",
             product: updatedProduct,
           };
-          resolve(response); 
+          resolve(response);
         } else {
           response = {
             status: false,

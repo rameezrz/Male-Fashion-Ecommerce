@@ -1,0 +1,113 @@
+<section class="h-100 bg-light d-flex flex-column justify-content-between ">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <div class="header__logo">
+                    <a href="/"><img src="/user/img/logo.png" alt=""></a>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-6">
+                <div class="header__nav__option">
+                    <a href="#"><img src="/user/img/icon/user.svg" alt=""></a>
+                    <a href="/user_registration" class="userLogin-p">
+                        <p class="userLogin-p">Register</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-n5">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col">
+                <div class="card card-registration my-2 ">
+                    <div class="row g-0">
+                        <div class="col-xl-6 d-none d-xl-block">
+                            <img src="./user/img/sign-up-2.jpg" alt="Sample photo" class="img-fluid"
+                                style="border-top-left-radius: .25rem; border-bottom-left-radius: .25rem;" />
+                        </div>
+                        <div class="col-xl-6 d-flex align-items-center justify-content-center">
+                            <div class="card-body text-black px-5">
+                                <h3 class="mb-4 px-5">Login to your account</h3>
+                                <%- include ("../partials/messages") %>
+                                    <div class="form-outline mb-1 px-5">
+                                        <label class="form-label" for="form3Example9">Mobile</label>
+                                        <div class="d-flex mb-3">
+                                            <input type="text" id="phone" placeholder="Mobile No." class="form-control"
+                                                name="phone" required />
+                                                <button class="btn btn-dark ms-3" onclick="sendOtp()" id="resendLink">Send</button>
+
+                                        </div>
+                                    </div>
+                                    <form action="/check-login-otp" method="post" class="px-5">
+                                        <div class="form-outline mb-3">
+                                            <label class="d-flex justify-content-between" for="form3Example99"
+                                                id="password-label-1">
+                                                OTP
+                                                <img src="./img/icon/hide.svg" alt="">
+                                            </label>
+                                            <input type="text" id="form3Example90" placeholder="Enter OTP" class="form-control" name="otp" />
+                                        </div>
+                                        <div class="d-flex flex-column justify-content-center my-2 pt-3">
+                                            <button type="submit" class="btn btn-custom btn-lg ms-2">Sign In</button>
+                                            <p class="mt-3 text-center">Don't have an account ? <a
+                                                    href="/user_registration" class="text-dark font-weight-bold">Sign
+                                                    up</a></p>
+                                        </div>
+                                    </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer Section Begin -->
+    <footer class="footer p-0 w-100">
+
+        <div class="col-lg-12 text-center">
+            <div class="footer__copyright__text">
+                <p>Copyright © 2023 All rights reserved</p>
+            </div>
+        </div>
+    </footer>
+    <!-- Footer Section End -->
+</section>
+
+<script>
+    function sendOtp() {
+        var timer = 60; // Time in seconds
+        var countdown = document.getElementById("resendLink");
+        var phone = document.getElementById('phone').value
+        console.log(phone);
+        $.ajax({
+            url: '/send-otp',
+            method: 'POST',
+            data: { phone },
+            success: (response) => {
+                console.log(response);
+            }
+        })
+
+        function startTimer() {
+        countdown.innerHTML = timer + "s";
+        timer--;
+        
+        if (timer < 0) {
+            countdown.innerHTML = "Resend";
+            countdown.classList.remove("disabled");
+            clearInterval(interval);
+        }
+    }
+    if (!countdown.classList.contains("disabled")) {
+            countdown.classList.add("disabled");
+            timer = 60;
+            startTimer();
+            var interval = setInterval(startTimer, 1000);
+        }
+        
+
+    }
+
+</script>
+

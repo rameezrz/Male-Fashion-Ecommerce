@@ -1,11 +1,27 @@
-<section class="h-100 bg-light d-flex align-items-center">
-    <div class="container py-3">
+<section class="h-100 bg-light d-flex flex-column justify-content-between">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6">
+                <div class="header__logo">
+                    <a href="/"><img src="/user/img/logo.png" alt=""></a>
+                </div>
+            </div>
+        
+            <div class="col-lg-6 col-md-6">
+                <div class="header__nav__option">
+                    <a href="#"><img src="/user/img/icon/user.svg" alt=""></a>
+                    <a href="/user_signin" class="userLogin-p"><p class="userLogin-p">Sign In</p></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-n5">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col">
                 <div class="card card-registration my-2 ">
                     <div class="row g-0">
                         <div class="col-xl-6 d-none d-xl-block">
-                            <img src="./user/img/sign-up.jpg"
+                            <img src="./user/img/sign-up-2.jpg"
                                 alt="Sample photo" class="img-fluid"
                                 style="border-top-left-radius: .25rem; border-bottom-left-radius: .25rem;" />
                         </div>
@@ -18,11 +34,13 @@
 
                                 <form action="/user_otp" method="post">
                                
-                                <div class="form-outline mb-3">
-                                    <label class="form-label" for="form3Example90">OTP</label>
-                                    <input type="text" id="form3Example90" placeholder="Enter OTP" class="form-control " name="otp"/>
-                                    <p class="text-end"><a href="/resend_user_otp" class="text-dark font-weight-bold">Resend</a></p>
-                                </div>
+                                    <div class="form-outline mb-3">
+                                        <label class="form-label" for="form3Example90">OTP</label>
+                                        <input type="text" id="form3Example90" placeholder="Enter OTP" class="form-control" name="otp" />
+                                        <p class="text-end">
+                                            <a href="/resend_user_otp" class="text-dark font-weight-bold" id="resendLink">Resend</a>
+                                        </p>
+                                    </div>
 
                                 
 
@@ -42,4 +60,51 @@
             </div>
         </div>
     </div>
+    <footer class="footer p-0 w-100">
+              
+        <div class="col-lg-12 text-center">
+            <div class="footer__copyright__text">
+                <p>Copyright © 2023 All rights reserved</p>
+            </div>
+        </div>
+</footer>
 </section>
+
+<script>
+    var timer = 60; // Time in seconds
+    var countdown = document.getElementById("resendLink");
+    
+    function startTimer() {
+        countdown.innerHTML = timer + "s";
+        timer--;
+        
+        if (timer < 0) {
+            countdown.innerHTML = "Resend";
+            countdown.href = "/resend_user_otp";
+            countdown.classList.remove("disabled");
+            clearInterval(interval);
+        }
+    }
+    
+    countdown.onclick = function () {
+        if (!countdown.classList.contains("disabled")) {
+            countdown.classList.add("disabled");
+            countdown.href = "javascript:void(0);";
+            timer = 60;
+            startTimer();
+            var interval = setInterval(startTimer, 1000);
+        }
+    };
+    
+    // Call the startTimer function when the page loads
+    window.addEventListener('load', function () {
+        if (!countdown.classList.contains("disabled")) {
+            countdown.classList.add("disabled");
+            countdown.href = "javascript:void(0);";
+            timer = 60;
+            startTimer();
+            var interval = setInterval(startTimer, 1000);
+        }
+    })
+    
+</script>
