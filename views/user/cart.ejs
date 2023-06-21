@@ -1,0 +1,190 @@
+<link rel="stylesheet" href="/user/css/modal.css">
+
+<style>
+    .btn-customized{
+        color: #000;
+        background-color: #f3f2ee;
+        border: none;
+        font-weight: bold;
+    }
+    .btn-customized.disabled{
+        background-color: #f8f8f8;
+        opacity: 50%;
+    }
+</style>
+
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Shopping Cart</h4>
+                    <div class="breadcrumb__links">
+                        <a href="/">Home</a>
+                        <a href="/shop">Shop</a>
+                        <span>Shopping Cart</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<% if(products.length === 0){ %>
+    <div class="container d-flex flex-column align-items-center py-5">
+        <img class="py-5" width="200px" src="/user/img/shopping-cart/empty-box.gif" alt="">
+        <h4>Oops! Cart Empty</h4>
+        <a href="/shop" class="btn btn-dark mt-4"> Continue Shopping</a>
+    </div>
+<% }else{%>
+    <!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="shopping__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% products.forEach((products, index) => { %>
+                                <tr>
+                                  <td class="product__cart__item">
+                                      <div class="product__cart__item__pic">
+                                        <a href="/shop/product/<%= products.product._id %>"><img style="width: 70px;" src="/admin/productImgMulter/<%= products.product.images[0]  %>" alt=""></a>
+                                      </div>
+                                      <div class="product__cart__item__text">
+                                        <a href="/shop/product/<%= products.product._id %>"><h6 style="max-width: 250px;"><%= products.product.productName %></h6></a>
+                                        <h5 class="d-inline">₹ <h5 class="d-inline" id="productPrice_<%= products.product._id %>"><%= products.product.salePrice %></h5></h5>
+                                      </div>
+                                  </td>
+                                  <td class="quantity__item">
+                                        <button class="btn btn-customized me-2" id="btn_<%=products.product._id  %>" onclick="changeProductQuantity('<%= products._id%>', '<%=products.product._id%>',-1)">-</button>
+                                        <span id="<%= products.product._id %>"><%= products.quantity %></span> 
+                                        <button class="btn btn-customized ms-2" onclick="changeProductQuantity('<%= products._id%>', '<%=products.product._id%>',1)">+</button>
+                                        <span class="d-block text-danger mt-2" id="error_<%= products.product._id %>"></span>
+                                  </td>
+                                  <td class="cart__price">₹ <h5 class="d-inline" id="total_<%= products.product._id %>"><%= products.product.salePrice * products.quantity  %></h5></td>
+                                  <td class="cart__close"><a href="#" data-toggle="modal" data-target="#success_tic" onclick="removeProduct('<%=products._id %>','<%=products.product._id %>')"><i class="fa fa-close"></i></a></td>
+                                </tr>
+                              <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="continue__btn">
+                            <a href="/shop">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="cart__discount">
+                    <h6>Discount codes</h6>
+                    <form action="#" class="mb-2">
+                        <input type="text" placeholder="Coupon code" value="FLAT1000" class="text-dark fw-bold">
+                        <button type="submit">Applied</button>
+                    </form>
+                    <span class="ms-2">Voucher Applied !!!</span>
+                </div>
+                <div class="cart__total">
+                    <h4 style="text-transform: uppercase;" class="mb-3">Cart total</h4>
+                    <ul>
+                        <li>Subtotal <span>₹&nbsp; <span id="totalAmount"> <%= totalAmount %></span></span></li>
+                        <li>Discount <span class="text-success">- ₹ 1000</span></li>
+                        <hr style="background-color: #000;">
+                        <li>Total <span>₹&nbsp; <span id="totalAmount2" style="font-size: 20px;"> <%= totalAmount-1000 %></span></span></li>
+                    </ul>
+                    <a href="/shop/checkout" class="primary-btn">Proceed to checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Shopping Cart Section End -->
+<% } %>
+
+<!-- Modal -->
+<div id="success_tic" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-top-right">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <a class="close" href="#" data-dismiss="modal">&times;</a>
+            <div class="page-body">
+                <div class="head">
+                    <h4 style="margin:5px;">Product Deleted</h4>
+                </div>
+
+                <h1 style="text-align:center;" class="mt-5">
+                    <div class="checkmark-circle">
+                        <div class="background"></div>
+                        <div class="checkmark draw"></div>
+                    </div>
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+
+    function changeProductQuantity(cartId,productId,count){
+        count = parseInt(count)
+        let quantity = parseInt(document.getElementById(productId).innerHTML)
+        $.ajax({
+            url:'/change-product-quantity',
+            data:{cartId,productId,count,quantity},
+            method:'post',
+            success:(response)=>{
+                console.log(response);
+                if(response.productQuantity.cannotDelete){
+                    const btn = document.getElementById('btn_'+productId)
+                    btn.classList.add('disabled')
+                }else if(response.productQuantity.limitExceed){
+                    const error = document.getElementById('error_'+productId)
+                    error.innerHTML = "Max Limit Exceeded"
+                }else{
+                    const error = document.getElementById('error_'+productId)
+                    error.innerHTML = ""
+                    const btn = document.getElementById('btn_'+productId)
+                    btn.classList.remove('disabled')
+                document.getElementById(productId).innerHTML = response.productQuantity
+                document.getElementById('totalAmount').innerHTML = response.totalAmount
+                document.getElementById('totalAmount2').innerHTML = response.totalAmount-1000
+                var totalPriceElement = document.getElementById("total_" + productId);
+                var salePrice = parseFloat(document.getElementById('productPrice_'+productId).innerHTML);
+                var newTotalPrice = (salePrice * response.productQuantity);
+                totalPriceElement.innerHTML = newTotalPrice;
+            }
+            }
+        })
+    }
+
+    function removeProduct(cartId,productId){
+        $.ajax({
+            url:'/remove-product',
+            data:{cartId,productId},
+            method:'post',
+            success:(response)=>{
+                setTimeout(()=>{
+                    location.reload()
+                },1000)
+            }
+        })
+    }
+
+    
+    
+  </script>

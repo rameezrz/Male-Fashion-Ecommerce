@@ -1,6 +1,7 @@
 const Product = require("../Models/productSchema");
 
 module.exports = {
+  //Adding new Products to database from admin side
   addProduct: (productData, imageDetails) => {
     const { productName, brand, productPrice, salePrice, stock, description } =
       productData;
@@ -38,6 +39,7 @@ module.exports = {
     });
   },
 
+  //editing Product from admin side
   editProduct: (productData, imageDetails) => {
     const { productName, brand, productPrice, salePrice, stock, description } =
       productData;

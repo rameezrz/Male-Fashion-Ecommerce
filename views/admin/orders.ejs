@@ -1,0 +1,52 @@
+
+<!-- Basic Bootstrap Table -->
+<div class="card">
+    <div class="table-responsive text-nowrap px-5 py-4">
+      <table class="table mb-3" id="myTable">
+        <thead class="mt-5">
+          <tr>
+            <th>Order Id</th>
+            <th>User</th>
+            <th>Payment</th>
+            <th>Total</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+          <% orders.forEach((order, index) => { %>
+            <tr>
+              <td><a href="/admin-panel/order-detail/<%= order._id %>"><%= order._id.toString().toUpperCase() %></a></td>
+              <td><%= order.deliveryAddress.firstName %> <%= order.deliveryAddress.lastName %></td>
+              <td><%= order.paymentMethod %></td>
+              <td>₹ <%= order.totalAmount %></td>
+              <td><%= order.createdAt.toLocaleDateString() %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!--/ Basic Bootstrap Table -->
+  
+          
+
+  
+
+  
+  
+  <script>
+    $(document).ready(function() {
+     
+     var scriptPromise = $.getScript("/admin/libs/data-table/datatables.min.js");
+    
+  
+  
+  scriptPromise.done(function() {
+    $('#myTable').DataTable();
+  });
+  
+  scriptPromise.fail(function() {
+    console.error("Failed to load DataTables script.");
+  });
+  });
+  </script>

@@ -1,4 +1,8 @@
 
+<link rel="stylesheet" href="/user/css/modal.css">
+
+
+
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-option">
     <div class="container">
@@ -108,18 +112,21 @@
                 </div>
                 <div class="row">
                     <% products.forEach(product => { %>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <a href="/shop/product/<%=product._id %>"><div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/<%=product.images[0] %>">
-                                </div></a>
-                                <div class="product__item__text">
-                                    <h6 style="color: #b19975;font-weight: 800;"><%= product.brand %></h6>
-                                    <h6><%= product.productName%></h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
-                                    <h5 class="d-inline">₹<%= product.salePrice  %> </h5><p style="color: #b19975;" class="text-decoration-line-through d-inline">₹<%= product.productPrice  %></p>
+                        <% if(product.stock > 0){ %>
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="product__item">
+                                    <a href="/shop/product/<%=product._id %>"><div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/<%=product.images[0] %>">
+                                    </div></a>
+                                    <div class="product__item__text">
+                                        <h6 style="color: #b19975;font-weight: 800;"><%= product.brand %></h6>
+                                        <h6><%= product.productName%></h6>
+                                        <input type="text" id="isUserLoggedIn" value="<%= isUserLoggedIn  %>" hidden>
+                                        <a href="#" id="addToCart" onclick="addToCart('<%=product._id%>'),event.preventDefault()" class="add-cart">+ Add To Cart</a>
+                                        <h5 class="d-inline">₹<%= product.salePrice  %> </h5><p style="color: #b19975;" class="text-decoration-line-through d-inline">₹<%= product.productPrice  %></p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            <% } %>
                    <% }); %>
                     
                     
@@ -139,3 +146,56 @@
     </div>
 </section>
 <!-- Shop Section End -->
+
+<!-- Modal -->
+<div id="success_tic" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-top-right">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <a class="close" href="#" data-dismiss="modal">&times;</a>
+            <div class="page-body">
+                <div class="head">
+                    <h4 style="margin:5px;">Product Added to Cart</h4>
+                </div>
+
+                <h1 style="text-align:center;" class="mt-5">
+                    <div class="checkmark-circle">
+                        <div class="background"></div>
+                        <div class="checkmark draw"></div>
+                    </div>
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    function addToCart(productId){
+        const isUserLoggedIn = document.getElementById('isUserLoggedIn').value
+        if(!isUserLoggedIn){
+            location.reload()
+        }else{
+            let cartCount = document.getElementById('cartCount')
+            $.ajax({
+                url:'/add-to-cart',
+                data:{productId},
+                method:'post',
+                success:(response)=>{
+                    cartCount.innerHTML = response
+                    if(response){
+                        $(document).ready(function() {
+                            $('#success_tic').modal('show'); // Show the modal
+                            
+                            setTimeout(function() {
+                                $('#success_tic').modal('hide'); // Hide the modal after 5 seconds
+                            }, 1000);
+                        });
+                    }
+                }
+            })
+        }
+    }
+
+</script>

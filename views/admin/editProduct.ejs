@@ -1,6 +1,6 @@
 
 <div class="col d-flex justify-content-center">
-  <form class="form w-50" action="/admin_panel/edit_product" method="POST" enctype="multipart/form-data">
+  <form class="form w-50" action="/admin-panel/edit-product" method="POST" enctype="multipart/form-data">
     <h4>Edit Product</h4>
     <div class="row mb-3">
       <label class="col-sm-2 col-form-label" for="basic-default-name">Name</label>
@@ -44,16 +44,19 @@
     <div class="form-group mb-3">
       <label for="selectBox" class="col-form-label">Categories</label>
       <select class=" form-control" name="category" id="categorySelect">
-        <option value="<%= selectedCategory  %>"> <%= selectedCategory %></option>
-        <% categories.forEach((category)=>{ %>
-          <option value="<%=category._id  %>"> <%= category.name %></option>
-      <% }); %>
+        <% categories.forEach((category) => { %>
+          <% if (selectedCategory && selectedCategory._id.toString() === category._id.toString()) { %>
+            <option value="<%= category._id %>" selected><%= category.name %></option>
+          <% } else { %>
+            <option value="<%= category._id %>"><%= category.name %></option>
+          <% } %>
+        <% }); %>
       </select>
     </div>
     <div class="form-group mb-3">
       <label for="selectBox" class="col-form-label">Choose Sub-Categories</label>
       <select class=" form-control" name="subCategory" id="subCategorySelect">
-          <option value="<%= selectedSubCategory._id  %>"> <%= selectedSubCategory  %></option>
+          <option value="<%= selectedSubCategory._id  %>"> <%= selectedSubCategory.name  %></option>
       </select>
     </div>
     <div class="mb-3">
@@ -79,7 +82,7 @@
         var categoryId = $(this).val(); 
         var subcategorySelect = $('#subCategorySelect'); 
           $.ajax({
-          url: '/admin_panel/get_subCategory', 
+          url: '/admin-panel/get-subCategory', 
           method: 'POST',
           data: { categoryId}, 
           success: function(subcategories) {

@@ -1,7 +1,9 @@
 const Category = require("../Models/categorySchema");
 const SubCategory = require("../Models/subCategorySchema");
+const Product = require('../Models/productSchema')
 
 module.exports = {
+  //Adding new category by checking it's not already there
   addCategory: (data) => {
     const category = data.category;
     let response = {};
@@ -29,6 +31,7 @@ module.exports = {
     });
   },
 
+  //Adding sub categories under selected categories
   addSubCategory: (data) => {
     const { subCategory, category } = data;
     let response = {};
@@ -59,19 +62,27 @@ module.exports = {
     });
   },
 
+  //deleting category by checking no products under particular category
   deleteCategory: (id) => {
     let response = {};
     return new Promise(async (resolve, reject) => {
       try {
-        const deleteCategory = await Category.deleteOne({ _id: id });
-        if (deleteCategory) {
-          response.status = true;
-          response.message = `Category Deleted Successfully`;
+        const isProduct = await Product.findOne({ category: id })
+        if (isProduct) {
+          response.status = false;
+          response.message = `Cannot Delete!!! Product Exist Under Category`;
           resolve(response);
         } else {
-          response.status = false;
-          response.message = `Error occured`;
-          resolve(response);
+          const deleteCategory = await Category.deleteOne({ _id: id });
+          if (deleteCategory) {
+            response.status = true;
+            response.message = `Category Deleted Successfully`;
+            resolve(response);
+          } else {
+            response.status = false;
+            response.message = `Error occured`;
+            resolve(response);
+          }
         }
       } catch (error) {
         reject(error);
@@ -79,6 +90,7 @@ module.exports = {
     });
   },
 
+  //deleting subcategory
   deleteSubCategory: (id) => {
     let response = {};
     return new Promise(async (resolve, reject) => {

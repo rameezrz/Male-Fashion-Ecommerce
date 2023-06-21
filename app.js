@@ -64,6 +64,6 @@ app.use(express.static("public"));
 
 //Routes
 app.use("/", require("./routes/userRoute"));
-app.use("/", require("./routes/adminRoute"));
+app.use("/admin-panel", require("./routes/adminRoute"));
 
 app.listen(process.env.PORT);

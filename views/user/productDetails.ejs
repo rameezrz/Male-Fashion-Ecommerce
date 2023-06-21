@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/user/css/modal.css">
+
 <section class="shop-details">
   <div class="product__details__pic">
     <div class="container">
@@ -56,7 +58,7 @@
 
             </div>
             <div class="product__details__cart__option">
-              <a href="#" class="primary-btn">add to cart</a>
+              <a href="" onclick="addToCart('<%= product._id%>'), event.preventDefault()" class="primary-btn">add to cart</a>
               <a href="#" class="text-dark mt-3 d-block"><i class="fa fa-heart"></i> add to wishlist</a>
             </div>
 
@@ -113,6 +115,28 @@
   </div>
 </section>
 
+<!-- Modal -->
+<div id="success_tic" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-top-right">
+      <!-- Modal content-->
+      <div class="modal-content">
+          <a class="close" href="#" data-dismiss="modal">&times;</a>
+          <div class="page-body">
+              <div class="head">
+                  <h4 style="margin:5px;">Product Added to Cart</h4>
+              </div>
+
+              <h1 style="text-align:center;" class="mt-5">
+                  <div class="checkmark-circle">
+                      <div class="background"></div>
+                      <div class="checkmark draw"></div>
+                  </div>
+              </h1>
+          </div>
+      </div>
+  </div>
+</div>
+
 
 
 <script>
@@ -130,4 +154,24 @@
       targetTab.classList.add('active');
     });
   });
+
+    function addToCart(productId){
+        let cartCount = document.getElementById('cartCount')
+        $.ajax({
+            url:'/add-to-cart',
+            data:{productId},
+            method:'post',
+            success:(response)=>{
+                cartCount.innerHTML = response
+                $(document).ready(function() {
+                    $('#success_tic').modal('show'); // Show the modal
+
+                    setTimeout(function() {
+                    $('#success_tic').modal('hide'); // Hide the modal after 5 seconds
+                    }, 2000);
+                });
+            }
+        })
+    }
+
 </script>

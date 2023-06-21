@@ -10,7 +10,7 @@
             <div class="col-lg-6 col-md-6">
                 <div class="header__nav__option">
                     <a href="#"><img src="/user/img/icon/user.svg" alt=""></a>
-                    <a href="/user_signin" class="userLogin-p"><p class="userLogin-p">Sign In</p></a>
+                    <a href="/user-signin" class="userLogin-p"><p class="userLogin-p">Sign In</p></a>
                 </div>
             </div>
         </div>
@@ -32,13 +32,13 @@
                                 <%- include ("../partials/messages") %>
 
 
-                                <form action="/user_otp" method="post">
+                                <form action="/user-otp" method="post">
                                
                                     <div class="form-outline mb-3">
                                         <label class="form-label" for="form3Example90">OTP</label>
                                         <input type="text" id="form3Example90" placeholder="Enter OTP" class="form-control" name="otp" />
                                         <p class="text-end">
-                                            <a href="/resend_user_otp" class="text-dark font-weight-bold" id="resendLink">Resend</a>
+                                            <a href="/resend-user-otp" class="text-dark font-weight-bold" id="resendLink">Resend</a>
                                         </p>
                                     </div>
 
@@ -80,7 +80,7 @@
         
         if (timer < 0) {
             countdown.innerHTML = "Resend";
-            countdown.href = "/resend_user_otp";
+            countdown.href = "/resend-user-otp";
             countdown.classList.remove("disabled");
             clearInterval(interval);
         }

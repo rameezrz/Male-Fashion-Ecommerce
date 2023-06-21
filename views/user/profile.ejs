@@ -1,0 +1,118 @@
+
+
+
+
+<div class="container d-flex" id="parentContainer">
+    <!-- Menu -->
+    <div class="layout-menu-container">
+    <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+   
+       <ul class="menu-inner py-1">
+         <!-- Dashboard -->
+         <li style="border-top: none;" class="menu-item <%= activeMenuItem === '/admin_panel' ? 'active' : '' %>">
+           <a href="/profile" class="menu-link">
+             <i class="menu-icon tf-icons fa-solid fa-user"></i>
+             <h6>Profile</h6>
+           </a>
+         </li>
+         <span class="line"></span>
+         <!-- Products -->
+         <li class="menu-item <%= activeMenuItem === '/products' ? 'active' : '' %>">
+           <a href="/profile/addresses" class="menu-link">
+               <i class="menu-icon tf-icons fa-solid fa-address-book"></i>
+               <h6>Addresses</h6> 
+           </a>
+       </li>
+       <span class="line"></span>
+       
+       <!-- Orders -->
+       <li class="menu-item <%= activeMenuItem === '/user_management' ? 'active' : '' %>">
+        <a href="/profile/orders" class="menu-link">
+            <i class="menu-icon fa-solid fa-rectangle-list"></i>
+            <h6>Orders</h6>
+        </a>
+    </li>
+    <span class="line"></span>
+       
+       
+       
+       <!-- Customers -->
+       <li class="menu-item <%= activeMenuItem === '/user_management' ? 'active' : '' %>">
+           <a href="/admin_panel/user_management" class="menu-link">
+               <i class="menu-icon fa-solid fa-lock"></i>
+               <h6>Change Password</h6>
+           </a>
+       </li>
+       <span class="line"></span>
+       
+       <!-- Coupon -->
+       <li class="menu-item">
+           <a href="#" class="menu-link text-danger" >
+               <i class="menu-icon tf-icons fa-solid fa-right-from-bracket"></i>
+               <h6 class="text-danger">Signout</h6>
+           </a>
+       </li>
+       
+       </ul>
+     </aside>
+    </div>
+     <!-- / Menu -->
+   
+     <div class="greeting">
+        <h4 class="mb-5">Personal Details</h4>
+        <div class="d-flex">
+        <img src="user/img/gifs/user-account.gif" style="height: 180px;" alt="">
+        <div class="border ms-4 p-4 rounded-3 bg-light ">
+        <h4><span class="fs-5 me-2">Name : </span><%= user.name %></h4>
+        <h4><span class="fs-5 me-2">Email : </span><%= user.email %></h4>
+        <h4><span class="fs-5 me-2">Phone : </span><%= user.phone %></h4>
+    </div>   
+</div>
+     </div>
+   </div>
+     
+     <style>
+        #parentContainer{
+            min-height: 85vh;
+        }
+        .layout-menu-container{
+            background-color: #f3f2ee;
+        }
+       .layout-menu{
+        margin-top: 20px;
+           width: 250px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+       }
+       .menu-item{
+           margin: 5px 0;
+           padding: 10px 20px;
+       }
+       .line{
+           display: block;
+           width: 100%;
+           border-top: 1px solid #0000001d;
+       }
+       .menu-item a{
+           color: #000;
+           font-size: 18px;
+       }
+       .menu-link{
+           display: flex;
+       }
+       .menu-inner{
+           list-style: none;
+       }
+       .menu-icon{
+           margin-right: 10px;
+       }
+       .greeting{
+            margin: 20px;
+           padding: 20px;
+       }
+       .greeting h4{
+           margin-bottom: 10px;
+       }
+   
+     </style>

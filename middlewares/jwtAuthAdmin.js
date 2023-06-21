@@ -5,7 +5,7 @@ const validateToken = (req, res, next) => {
 
     if (!accessToken) {
         req.flash("errorMsg", "Not Authenticated")
-        res.redirect('/admin_login')
+        res.redirect('/admin-panel/login')
     }
 
     try {
@@ -17,7 +17,7 @@ const validateToken = (req, res, next) => {
     } catch (err) {
         req.flash('errorMsg', "Token malformed")
     }
-    res.redirect('/admin_login')
+    res.redirect('/admin-panel/login')
 }
 
 module.exports = validateToken

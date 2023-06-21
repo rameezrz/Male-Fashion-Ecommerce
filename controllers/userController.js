@@ -1,23 +1,32 @@
 const userHelper = require("../helpers/userHelper");
+const cartHelper = require('../helpers/cartHelper')
 const User = require('../Models/userSchema')
 const Product = require("../Models/productSchema");
 const Category = require("../Models/categorySchema");
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
-const client = require("twilio")(accountSid, authToken);
+const client = require("twilio")(accountSid, authToken); 
 
-const baseRoute = (req, res) => {
+
+//Display home Page
+const baseRoute = async(req, res) => { 
   try {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
     const userName = isUserLoggedIn ? req.session.userName : "";
     const activeMenuItem = "/home";
-    res.render("user/index", { userName, isUserLoggedIn, activeMenuItem });
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
+    res.render("user/index", { userName, isUserLoggedIn, activeMenuItem, cartCount });
   } catch (error) {
     console.log(error);
   }
 };
 
+
+//Display SignIn Page
 const displaySignIn = (req, res) => {
   try {
     res.render("user/signIn", { layout: "layouts/blankLayout" });
@@ -26,6 +35,8 @@ const displaySignIn = (req, res) => {
   }
 };
 
+
+//Verifying User SignIn
 const signIn = async (req, res) => {
   try {
     const response = await userHelper.signIn(req.body);
@@ -35,16 +46,19 @@ const signIn = async (req, res) => {
       res.cookie("jwtToken", accessToken, { maxAge, httpOnly: true });
       req.session.isUserLoggedIn = true;
       req.session.userName = response.user.name;
+      req.session.user = response.user
       res.redirect("/");
     } else {
       req.flash("errorMsg", response.message);
-      res.redirect("/user_signin");
+      res.redirect("/user-signin");
     }
   } catch (error) {
     console.log(error);
   }
 };
 
+
+//Display Mobile Otp Login Page
 const displayOtpLogin = (req, res) => {
   try {
     res.render("user/otpLogin", { layout: "layouts/blankLayout" });
@@ -53,6 +67,8 @@ const displayOtpLogin = (req, res) => {
   }
 }
 
+
+//Sending OTP to User Mobile
 const sendOtp = (req, res) => {
   try {
     const mob = req.body.phone
@@ -64,6 +80,8 @@ const sendOtp = (req, res) => {
   }
 }
 
+
+//Checking User Entered OTP is correct or not
 const checkLoginOtp = async(req, res) => {
   try {
     const otp = req.body.otp;
@@ -81,6 +99,7 @@ const checkLoginOtp = async(req, res) => {
       let maxAge = 60 * 60 * 24 * 3 * 1000;
       const accessToken = userHelper.createJwtToken(user);
       res.cookie("jwtToken", accessToken, { maxAge, httpOnly: true });
+      req.session.user=user
       req.session.isUserLoggedIn = true;
       req.session.userName = user.name;
       res.redirect("/");
@@ -93,6 +112,8 @@ const checkLoginOtp = async(req, res) => {
   }
 }
 
+
+//Display User Registration Form
 const displayRegistration = (req, res) => {
   try {
     var name = "";
@@ -114,6 +135,8 @@ const displayRegistration = (req, res) => {
   }
 };
 
+
+//Registering new User
 const registration = (req, res) => {
   try {
     const mob = req.body.phone;
@@ -121,11 +144,11 @@ const registration = (req, res) => {
     userHelper.findSignUp(req.body).then(async (response) => {
       if (response.status) {
         userHelper.sendOtp(mob);
-        res.redirect("/user_otp");
+        res.redirect("/user-otp");
       } else {
         console.log(response.message);
         req.flash("errorMsg", "User already Registered");
-        res.redirect("/user_registration");
+        res.redirect("/user-registration");
       }
     });
   } catch (error) {
@@ -133,16 +156,20 @@ const registration = (req, res) => {
   }
 };
 
+
+//Resending OTP to User
 const resendOtp = (req, res) => {
   try {
     const mob = req.session.body.phone;
     userHelper.sendOtp(mob);
-    res.redirect("/user_otp");
+    res.redirect("/user-otp");
   } catch (error) {
     console.log(error);
   }
 };
 
+
+//Displaying OTP Entering Page
 const userOtp = (req, res) => {
   try {
     res.render("user/otp", { layout: "layouts/blankLayout" });
@@ -151,6 +178,8 @@ const userOtp = (req, res) => {
   }
 };
 
+
+//Checking OTP User Entered
 const checkOtp = async (req, res) => {
   try {
     const otp = req.body.otp;
@@ -170,13 +199,15 @@ const checkOtp = async (req, res) => {
       res.redirect("/");
     } else {
       req.flash("errorMsg", "Invalid OTP");
-      res.redirect("/user_otp");
+      res.redirect("/user-otp");
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 };
 
+
+//Displaying Products to the User
 const displayShop = async (req, res) => {
   try {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
@@ -185,6 +216,10 @@ const displayShop = async (req, res) => {
     const brandList = await Product.distinct("brand");
     const categories = await Category.find();
     const activeMenuItem = "/shop";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
     res.render("user/shop", {
       userName,
       isUserLoggedIn,
@@ -192,12 +227,15 @@ const displayShop = async (req, res) => {
       activeMenuItem,
       categories,
       brandList,
+      cartCount
     });
   } catch (error) {
     console.log(error);
   }
 };
 
+
+//Sorting Products based on Category
 const shopByCategory = async (req, res) => {
   try {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
@@ -209,6 +247,10 @@ const shopByCategory = async (req, res) => {
     const brandList = await Product.distinct("brand");
     const categories = await Category.find();
     const activeMenuItem = "/shop";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
     res.render("user/shop", {
       userName,
       brandList,
@@ -216,10 +258,13 @@ const shopByCategory = async (req, res) => {
       products,
       activeMenuItem,
       categories,
+      cartCount
     });
   } catch (error) {}
 };
 
+
+//Sorting Products based on Brands
 const shopByBrand = async (req, res) => {
   try {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
@@ -243,6 +288,8 @@ const shopByBrand = async (req, res) => {
   } catch (error) {}
 };
 
+
+//Displaying details about the product which user is selected
 const displayProduct = async (req, res) => {
   try {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
@@ -251,18 +298,44 @@ const displayProduct = async (req, res) => {
     const product = await Product.findById(id);
     const category = await Category.findById(product.category);
     const activeMenuItem = "/shop";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
     res.render("user/productDetails", {
       userName,
       isUserLoggedIn,
       product,
       category,
       activeMenuItem,
+      cartCount
     });
   } catch (error) {
     console.log(error);
   }
 };
 
+
+//Displaying User Profile
+const displayProfile = async(req, res) => {
+  try {
+    const isUserLoggedIn = req.session.isUserLoggedIn || false;
+    const userName = isUserLoggedIn ? req.session.userName : "";
+    const user=req.session.user
+    const activeMenuItem = "/home";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
+    res.render("user/profile", { userName, isUserLoggedIn, activeMenuItem, cartCount,user });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+//User Logout function
 const logout = (req, res) => {
   try {
     res.clearCookie("jwtToken");
@@ -289,5 +362,6 @@ module.exports = {
   shopByCategory,
   shopByBrand,
   displayProduct,
+  displayProfile,
   logout,
 };

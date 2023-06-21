@@ -20,7 +20,7 @@
             <td><%= user.email %></td>
             <td><%= user.phone %></td>
             <% if (user.isBlocked) { %>
-              <td><a href="/admin_panel/unblock_user/<%= user._id %>" class="btn btn-success">Unblock</a></td>
+              <td><a href="/admin-panel/unblock-user/<%= user._id %>" class="btn btn-success">Unblock</a></td>
             <% } else { %>
               <td><a href="#modalCenter" data-bs-toggle="modal" data-bs-target="#modalCenter"  data-product-id="<%= user._id %>" class="btn btn-danger">Block</a></td>
             <% } %>
@@ -45,7 +45,6 @@
               <i class='bx bx-message-alt-x text-danger' style="font-size: 50px;"></i>
             </div>
             <h3 class="modal-title" id="modalCenterTitle">Are you sure?</h3>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
             <p>Do you really want to block this User?</p>
@@ -68,7 +67,7 @@ document.getElementById('modalCenter').addEventListener('show.bs.modal', functio
   const button = event.relatedTarget;
   const productId = button.getAttribute('data-product-id');
   const deleteButton = document.getElementById('deleteProductButton');
-  deleteButton.href = `/admin_panel/block_user/${productId}`;
+  deleteButton.href = `/admin-panel/block-user/${productId}`;
 });
 </script>
 

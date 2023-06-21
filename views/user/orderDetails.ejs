@@ -1,0 +1,133 @@
+<div class="py-3 pb-5 bg-light">
+    <div class="container">
+    <div class="d-flex justify-content-between">
+        <div class="col p-4 mt-3 bg-white">
+            <h5>Delivery Address</h5>
+            <h5 class="fw-bold mt-3"><%= order.deliveryAddress.firstName  %> <%= order.deliveryAddress.lastName %></h5>
+            <p style="max-width: 400px;">
+                <%= order.deliveryAddress.address1 %>, <%= order.deliveryAddress.address2 %>,
+                <%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %>,
+                <%= order.deliveryAddress.country %> - <%= order.deliveryAddress.pincode %>
+            </p>
+            <h5>Phone <span class="fw-bold"><%= order.deliveryAddress.phone %></span></h5>
+        </div>
+        <div class="col p-4 mt-3 ms-3 bg-white d-flex box-2 align-items-center">
+            <div class="ms-4">
+                <h5>Order ID </h5>
+                <h5>Date </h5>
+                <h5>Payment Mode </h5>
+                <h5>Total Amount </h5>
+            </div>
+            <div class="ms-3">
+                <h5 class="fw-bold" ><%= order._id.toString().toUpperCase() %> </h5>
+                <h5 class="fw-bold" ><%= order.createdAt.toLocaleDateString() %> | <%= order.createdAt.toLocaleTimeString() %> </h5>
+                <% if(order.paymentMethod === "COD"){ %>
+                    <h5 class="fw-bold" >Cash On Delivery</h5>
+                    <% }else{ %>
+                    <h5 class="fw-bold" ><%= order.paymentMethod %></h5> 
+                <% } %>
+                <h5 class="fw-bold" >₹ <%= order.totalAmount %></h5>
+            </div>
+        </div>
+    </div>
+    <div class="container d-flex justify-content-between mt-5">
+        <h4>Products</h4>
+    </div>
+    <% orderItems.forEach(product=>{  %>
+        <div class="container py-4 mt-3 bg-white d-flex align-items-center">
+            <div >
+                <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0] %>" alt="">
+            </div>
+            <div class="col ms-3">
+                <h5 class="mb-2"><%= product.product.productName %></h5>
+            </div>
+            <div class="col">
+                <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
+            </div>
+            <div class="col">
+                <h5 class="fw-bold mb-2"><%= product.quantity %></h5>
+            </div>
+            <div class="col">
+                <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
+            </div>
+            <div class="col">
+                <% if(product.status==='Cancelled'){ %>
+                    <h5 class="fw-bold mb-2 text-danger" id="status"><%= product.status %></h5>
+                    <h6>Reason : <%= product.reason %></h6>
+                    <% }else{ %>
+                        <h5 class="fw-bold mb-2 text-success"><%= product.status %></h5>
+                        <% } %>
+                    </div>
+                    <div class="col">
+                        <% if(product.status==='Placed'){ %>
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">Cancel</button>
+                    <input type="text" id="orderId" value="<%= product._id %>" hidden>
+                    <input type="text" id="itemId" value="<%= product.item %>" hidden>
+                    <input type="text" id="quantity" value="<%= product.quantity %>" hidden>
+                    <% }else if(product.status==='Delivered'){ %>
+                        <button class="btn btn-danger">Return</button>
+                        <% }else{ %>
+                        <h5 class="fw-bold mb-2">on <%= product.date.toLocaleDateString()  %></h5>
+                        <% } %>
+                    </div>
+        </div>
+        <% }) %>
+    
+    <div class="container mt-3 d-flex justify-content-between ">
+        <a href="/orders" class="site-btn">back</a>
+        
+    </div>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 fw-bold" id="exampleModalLabel">Let us know why</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="p-3">
+                <label for="exampleFormControlTextarea1" class="form-label">Reason for Cancellation <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-danger" onclick="cancelOrder()">Cancel Product</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<style>
+    .box-2 div > * {
+        margin-bottom: 15px;
+    }
+</style>
+
+<script>
+    const cancelOrder = ()=>{
+        const orderId = document.getElementById('orderId').value
+        const itemId = document.getElementById('itemId').value
+        const quantity = document.getElementById('quantity').value
+        const reason = document.getElementById('exampleFormControlTextarea1').value
+        $.ajax({
+            url:'/order-cancel',
+            method:'post',
+            data:{orderId,itemId,reason,quantity},
+            success:(response)=>{
+                location.reload()
+            }
+        })
+    }
+const myModal = document.getElementById('myModal')
+const myInput = document.getElementById('myInput')
+
+myModal.addEventListener('shown.bs.modal', () => {
+  myInput.focus()
+})
+</script>
+

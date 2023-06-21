@@ -4,38 +4,43 @@ const adminController = require('../controllers/adminController')
 const validateToken = require("../middlewares/jwtAuthAdmin")
 
 //Auth Routes
-router.get('/admin_login', adminController.displayLogin)
-router.post('/admin_login', adminController.postLogin)
+router.get('/login', adminController.displayLogin)
+router.post('/login', adminController.postLogin)
 
 //Dashboard
-router.get('/admin_panel',validateToken, adminController.dashboard)
+router.get('/',validateToken, adminController.dashboard)
 
 
 //User Management Routes
-router.get('/admin_panel/user_management', validateToken, adminController.displayUsers)
-router.get('/admin_panel/block_user/:id',validateToken,adminController.blockUser)
-router.get('/admin_panel/unblock_user/:id', validateToken,adminController.UnblockUser)
+router.get('/user-management', validateToken, adminController.displayUsers)
+router.get('/block-user/:id',validateToken,adminController.blockUser)
+router.get('/unblock-user/:id', validateToken,adminController.UnblockUser)
 
 //Category Routes
-router.get('/admin_panel/addCategories',validateToken,adminController.displayAddCategories)
-router.get('/admin_panel/addSubCategories',validateToken,adminController.displayAddSubCategories)
-router.post('/admin_panel/add_category',validateToken,adminController.addCategory)
-router.get('/admin_panel/delete_category/:id',validateToken,adminController.deleteCategory)
-router.post('/admin_panel/add_subCategory', validateToken, adminController.addSubCategory)
-router.get('/admin_panel/delete_subCategory/:id',validateToken,adminController.deleteSubCategory)
-router.post('/admin_panel/get_subCategory',validateToken,adminController.getSubCategory)
+router.get('/add-categories',validateToken,adminController.displayAddCategories)
+router.get('/add-subCategories',validateToken,adminController.displayAddSubCategories)
+router.post('/add-category',validateToken,adminController.addCategory)
+router.get('/delete-category/:id',validateToken,adminController.deleteCategory)
+router.post('/add-subCategory', validateToken, adminController.addSubCategory)
+router.get('/delete-subCategory/:id',validateToken,adminController.deleteSubCategory)
+router.post('/get-subCategory',validateToken,adminController.getSubCategory)
 
 //Product Routes
-router.get('/admin_panel/products',validateToken, adminController.displayProducts)
-router.get('/admin_panel/add_product',validateToken,adminController.displayAddProduct)
-router.post('/admin_panel/add_product',validateToken,adminController.addProduct)
-router.get('/admin_panel/edit_product/:id',validateToken,adminController.displayEditProduct)
-router.post('/admin_panel/edit_product',validateToken,adminController.editProduct)
-router.get('/admin_panel/delete_product/:id',validateToken,adminController.deleteProduct)
-router.get('/admin_panel/unblock_product/:id', validateToken, adminController.unblockProduct)
+router.get('/products',validateToken, adminController.displayProducts)
+router.get('/add-product',validateToken,adminController.displayAddProduct)
+router.post('/add-product',validateToken,adminController.addProduct)
+router.get('/edit-product/:id',validateToken,adminController.displayEditProduct)
+router.post('/edit-product',validateToken,adminController.editProduct)
+router.get('/delete-product/:id',validateToken,adminController.deleteProduct)
+router.get('/unblock-product/:id', validateToken, adminController.unblockProduct)
+
+//Order Routes
+router.get('/orders',validateToken,adminController.displayOrders)
+router.get('/order-detail/:id',validateToken,adminController.orderDetails)
+router.post('/order-cancel',validateToken,adminController.cancelOrder)
 
 //Logout 
-router.get('/adminLogout',validateToken,adminController.logout)
+router.get('/logout',validateToken,adminController.logout)
 
 //Export
 module.exports = router

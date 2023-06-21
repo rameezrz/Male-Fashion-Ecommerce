@@ -7,6 +7,7 @@ const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken);
 
 module.exports = {
+  //Finding whether user is already registered or not
   findSignUp: (dataBody) => {
     let { email, phone } = dataBody;
     let response = {};
@@ -30,6 +31,7 @@ module.exports = {
     });
   },
 
+  //Registering new User details to database
   signUp: (dataBody) => {
     return new Promise(async (resolve, reject) => {
       try {
@@ -50,6 +52,7 @@ module.exports = {
     });
   },
 
+  //Sign in Function for registered Users
   signIn: (userData) => {
     const { email, password } = userData;
     let response = {};
@@ -85,12 +88,14 @@ module.exports = {
     });
   },
 
+  //sending otp to the given mobile number
   sendOtp: async (mob) => { 
     await client.verify.v2
       .services(verifySid)
       .verifications.create({ to: `+91${mob}`, channel: "sms" });
   },
 
+  //creating JWT Token to user for Authorization
   createJwtToken: (user) => {
     const accessToken = sign(
       {

@@ -1,6 +1,6 @@
 
 <div class="col d-flex justify-content-center">
-  <form class="form w-50" action="/admin_panel/add_product" method="post" enctype="multipart/form-data">
+  <form class="form w-50" action="/admin-panel/add-product" method="post" enctype="multipart/form-data">
     <h4>Add Product</h4>
     <div class="form-group mb-3">
       <input type="text" class="form-control" id="exampleInputEmail1"  placeholder="Product Title" name="productName" required>
@@ -47,11 +47,11 @@
 <script src="/admin/js/productFormValidation.js"></script>
 
 <script>
-  $('#categorySelect').on('change', function() {
+  $('#categorySelect').on('click', function() {
         var categoryId = $(this).val(); 
         var subcategorySelect = $('#subCategorySelect'); 
           $.ajax({
-          url: '/admin_panel/get_subCategory', 
+          url: '/admin-panel/get-subCategory', 
           method: 'POST',
           data: { categoryId}, 
           success: function(subcategories) {

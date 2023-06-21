@@ -524,8 +524,8 @@ ol {
 	color: #0d0d0d;
 	font-size: 11px;
 	position: absolute;
-	left: 5px;
-	top: 8px;
+	left: 9px;
+	top: -2px;
 }
 
 .header__nav__option a:last-child {

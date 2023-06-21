@@ -2,7 +2,7 @@
     
     <div class="row d-flex justify-content-end">
       <div class="col-xl-2 d-flex justify-content-end">
-        <a href="/admin_panel/add_product"><button class="btn btn-primary " type="submit" data-toggle="modal" data-target="#exampleModalCenter">Add Product</button></a>
+        <a href="/admin-panel/add-product"><button class="btn btn-primary " type="submit" data-toggle="modal" data-target="#exampleModalCenter">Add Product</button></a>
       </div>
     </div>
   </div>
@@ -36,8 +36,8 @@
           <td><%= product.productName %></td>
           <td><%= product.brand %></td>
           <td><%= getCategoryName(product.category) %></td>
-          <td><%= product.productPrice %></td>
-          <td><%= product.salePrice %></td>
+          <td>₹ <%= product.productPrice %></td>
+          <td>₹ <%= product.salePrice %></td>
           <% if (product.stock<1) { %>
             <td><span class="badge bg-label-danger">Out of Stock</span></td>
             <% }else{ %>
@@ -48,9 +48,9 @@
             <% } else { %>
               <td><span class="badge bg-label-success">Active</span></td>
           <% } %>
-          <td><a href="/admin_panel/edit_product/<%= product._id %>" class="text-secondary"><i class='bx bx-edit'></i></a></td>
+          <td><a href="/admin-panel/edit-product/<%= product._id %>" class="text-secondary"><i class='bx bx-edit'></i></a></td>
           <% if (product.isRemoved) { %>
-            <td><a href="/admin_panel/unblock_product/<%= product._id %>" class="btn btn-success">Unblock</a></td>
+            <td><a href="/admin-panel/unblock-product/<%= product._id %>" class="btn btn-success">Unblock</a></td>
           <% } else { %>
             <td><a href="#modalCenter" data-bs-toggle="modal" data-bs-target="#modalCenter" class="text-danger" data-product-id="<%= product._id %>"><i class='bx bx-trash'></i></a></td>
           <% } %>
@@ -71,7 +71,6 @@
                 <i class='bx bx-message-alt-x text-danger' style="font-size: 50px;"></i>
               </div>
               <h3 class="modal-title" id="modalCenterTitle">Are you sure?</h3>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
               <p>Do you really want to delete this Product?</p>
@@ -94,7 +93,7 @@
     const button = event.relatedTarget;
     const productId = button.getAttribute('data-product-id');
     const deleteButton = document.getElementById('deleteProductButton');
-    deleteButton.href = `/admin_panel/delete_product/${productId}`;
+    deleteButton.href = `/admin-panel/delete-product/${productId}`;
   });
 </script>
 
@@ -114,6 +113,7 @@ scriptPromise.fail(function() {
 });
 });
 </script>
+
 
 
 

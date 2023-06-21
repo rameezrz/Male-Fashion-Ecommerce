@@ -1,7 +1,7 @@
  <!-- Menu -->
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" style="width: 230px;">
     <div class="app-brand demo">
-      <a href="/admin_panel" class="app-brand-link">
+      <a href="/admin-panel" class="app-brand-link">
         <span class="app-brand-logo demo">
 
         </span>
@@ -18,7 +18,7 @@
     <ul class="menu-inner py-1">
       <!-- Dashboard -->
       <li class="menu-item <%= activeMenuItem === '/admin_panel' ? 'active' : '' %>">
-        <a href="/admin_panel" class="menu-link">
+        <a href="/admin-panel" class="menu-link">
           <i class="menu-icon tf-icons bx bx-home-circle"></i>
           <div data-i18n="Analytics">Dashboard</div>
         </a>
@@ -26,7 +26,7 @@
 
       <!-- Products -->
       <li class="menu-item <%= activeMenuItem === '/products' ? 'active' : '' %>">
-        <a href="/admin_panel/products" class="menu-link">
+        <a href="/admin-panel/products" class="menu-link">
           <i class="menu-icon tf-icons bx bx-box"></i>
           <div data-i18n="Analytics">Products</div> 
         </a>
@@ -41,28 +41,28 @@
 
         <ul class="menu-sub">
           <li class="menu-item <%= activeMenuItem === '/addCategories' ? 'active' : '' %>">
-            <a href="/admin_panel/addCategories" class="menu-link">
+            <a href="/admin-panel/add-categories" class="menu-link">
               <div data-i18n="Without menu">Add Categories</div>
             </a>
           </li>
           <li class="menu-item <%= activeMenuItem === '/addSubCategories' ? 'active' : '' %>">
-            <a href="/admin_panel/addSubCategories" class="menu-link">
+            <a href="/admin-panel/add-subCategories" class="menu-link">
               <div data-i18n="Without navbar">Add Sub-Categories</div>
             </a>
         </ul>
       </li>
 
       <!-- Order list -->
-      <li class="menu-item">
-        <a href="#" class="menu-link">
+      <li class="menu-item <%= activeMenuItem === '/order_history' ? 'active' : '' %>">
+        <a href="/admin-panel/orders" class="menu-link">
           <i class="menu-icon tf-icons bx bx-list-ul"></i>
-          <div data-i18n="Analytics">Order list</div>
+          <div data-i18n="Analytics">Orders list</div>
         </a>
       </li>
 
       <!-- Customers -->
       <li class="menu-item <%= activeMenuItem === '/user_management' ? 'active' : '' %>">
-        <a href="/admin_panel/user_management" class="menu-link">
+        <a href="/admin-panel/user-management" class="menu-link">
           <i class="menu-icon tf-icons bx bx-group"></i>
           <div data-i18n="Analytics">Customers</div>
         </a>

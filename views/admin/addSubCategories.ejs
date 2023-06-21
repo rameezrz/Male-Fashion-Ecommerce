@@ -1,6 +1,6 @@
 <div class="col mt-3 w-50">
   <%- include('../partials/messages') %>
-  <form class="form" action="/admin_panel/add_subCategory" method="post">
+  <form class="form" action="/admin-panel/add-subCategory" method="post">
     <div class="form-group sm-3 mb-2">
       <label for="inputPassword2" class="">Add Sub-Category</label>
       <input type="text" class="form-control" id="category" name="subCategory" placeholder="Shirt">
@@ -54,7 +54,6 @@
               <i class='bx bx-message-alt-x text-danger' style="font-size: 50px;"></i>
             </div>
             <h3 class="modal-title" id="modalCenterTitle">Are you sure?</h3>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body text-center">
             <p>Do you really want to delete this Sub-Category?</p>
@@ -77,7 +76,7 @@ document.getElementById('modalCenter').addEventListener('show.bs.modal', functio
   const button = event.relatedTarget;
   const subCategoryId = button.getAttribute('data-subCategory-id');
   const deleteButton = document.getElementById('deleteSubCategoryButton');
-  deleteButton.href = `/admin_panel/delete_subCategory/${subCategoryId}`;
+  deleteButton.href = `/admin-panel/delete-subCategory/${subCategoryId}`;
 });
 </script>
 

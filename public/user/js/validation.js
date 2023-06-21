@@ -57,7 +57,7 @@ function validatePassword1() {
     pass1Error.innerHTML = "";
     return true;
   } else {
-    pass1Error.innerHTML = "Invalid Password";
+    pass1Error.innerHTML = "Weak Password";
     pass1Error.classList.remove("text-success");
     pass1Error.classList.add("text-danger");
     return false;
