@@ -7,6 +7,7 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken); 
+const bcrypt = require('bcrypt')
 
 
 //Display home Page
@@ -90,8 +91,6 @@ const checkLoginOtp = async(req, res) => {
     let response = await client.verify.v2
       .services(verifySid)
       .verificationChecks.create({ to: `+91${mob}`, code: otp });
-    response.valid = true;
-    console.log(response);
     if (response.valid) {
       const user = await User.findOne({ phone: mob })
       console.log(user);
@@ -316,6 +315,7 @@ const displayProduct = async (req, res) => {
 };
 
 
+
 //Displaying User Profile
 const displayProfile = async(req, res) => {
   try {
@@ -327,10 +327,86 @@ const displayProfile = async(req, res) => {
     if (isUserLoggedIn) {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
-    res.render("user/profile", { userName, isUserLoggedIn, activeMenuItem, cartCount,user });
+    res.render("user/profile", {
+      userName, isUserLoggedIn,
+      activeMenuItem, cartCount, user,
+      layout: "layouts/profileLayout",
+      activeMenuItem:"/profile"
+    });
   } catch (error) {
     console.log(error);
   }
+}
+
+//display Change Password page
+const displayChangePassword = async(req, res) => {
+  try {
+    const isUserLoggedIn = req.session.isUserLoggedIn || false;
+    const userName = isUserLoggedIn ? req.session.userName : "";
+    const user=req.session.user
+    const activeMenuItem = "/home";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
+    res.render("user/changePassword", {
+      userName, isUserLoggedIn,
+      activeMenuItem, cartCount, user,
+      layout: "layouts/profileLayout",
+      activeMenuItem:"/change-password"
+    });
+  } catch (error) {
+    console.log();
+  }
+}
+
+
+//check the entered password and send OTP if it's correct
+const checkPassword = async(req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    const user = await User.findById(req.session.user._id)
+    const isNewPasswordSame = await bcrypt.compare(newPassword,user.password)
+    await bcrypt.compare(currentPassword, user.password).then(async(match) => {
+      if (!match) {
+        res.json({response:"Current Password is Incorrect",error:true})
+      } else if (isNewPasswordSame) {
+        res.json({response:"New Password cannot be same to current Password",error:true})
+      } else {
+        await userHelper.sendOtp(user.phone)
+        await bcrypt.hash(newPassword, 10).then((hashedPassword) => {
+          req.session.newPassword = hashedPassword
+        })
+        res.json({response:`We have sent an OTP to your Registered Mobile Number ****${user.phone.toString().slice(6,10)}`})
+      }
+    })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+//saving new password to DB if OTP is correct
+const changePassword = async(req, res) => {
+  try {
+    const otp = req.body.otp
+    const mob = req.session.user.phone
+    const newPassword = req.session.newPassword
+    delete req.session.newPassword;
+    let otpResponse = await client.verify.v2
+      .services(verifySid)
+      .verificationChecks.create({ to: `+91${mob}`, code: otp });
+    if (otpResponse.valid) {
+      await User.updateOne({ _id: req.session.user._id }, { password: newPassword })
+      req.flash('successMsg', "Password Updated Successfully")
+      res.json({response:"Success"})
+    } else {
+      res.json({response:"Invalid OTP",error:true})
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
 }
 
 
@@ -363,5 +439,8 @@ module.exports = {
   shopByBrand,
   displayProduct,
   displayProfile,
+  displayChangePassword,
+  checkPassword,
+  changePassword,
   logout,
 };

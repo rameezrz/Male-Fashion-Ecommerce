@@ -52,6 +52,9 @@ router.post('/profile/add-new-address', isLoggedIn, validateToken, addressContro
 router.get('/profile/delete-address/:userId/:addressId', isLoggedIn, validateToken, addressController.deleteAddress)
 router.get('/profile/edit-address/:userId/:addressId', isLoggedIn, validateToken, addressController.displayEditAddress)
 router.post('/profile/edit-address', isLoggedIn, validateToken, addressController.editAddress)
+router.get('/profile/change-password', isLoggedIn, validateToken, userController.displayChangePassword)
+router.post('/profile/change-password-check', isLoggedIn, validateToken, userController.checkPassword)
+router.post('/profile/change-password', isLoggedIn, validateToken, userController.changePassword)
 
 //Logout Route
 router.get('/logout',userController.logout)

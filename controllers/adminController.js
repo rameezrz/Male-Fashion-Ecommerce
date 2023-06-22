@@ -383,7 +383,7 @@ const unblockProduct = async (req, res) => {
 //Display Users Orders
 const displayOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().sort({ createdAt: -1 });
     const activeMenuItem = "/order_history";
     res.render("admin/orders", {
       title: "Order History",

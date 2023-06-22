@@ -13,7 +13,12 @@ const displayAddress = async(req, res) => {
           cartCount = await cartHelper.getCartCount(req.session.user._id)
         }
         const addressList = await Address.findOne({ user: user._id })
-        res.render("user/addresses", { userName, isUserLoggedIn, activeMenuItem, cartCount,user,addressList });
+        res.render("user/addresses", {
+            userName, isUserLoggedIn,
+            activeMenuItem, cartCount, user,
+            addressList, layout: "layouts/profileLayout",
+            activeMenuItem:"/addresses"
+        });
       } catch (error) {
         console.log(error);
       }

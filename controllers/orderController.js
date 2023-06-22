@@ -45,12 +45,17 @@ const displayOrders = async(req, res) => {
       const userName = isUserLoggedIn ? req.session.userName : "";
       const user=req.session.user
       const activeMenuItem = "/home";
-        const orders = await Order.find({ user: user._id })
+      const orders = await Order.find({ user: user._id }).sort({ createdAt: -1 });
       let cartCount = 0
       if (isUserLoggedIn) {
         cartCount = await cartHelper.getCartCount(req.session.user._id)
       }
-      res.render("user/orders", { userName, isUserLoggedIn, activeMenuItem, cartCount,user,orders });
+      res.render("user/orders", {
+        userName, isUserLoggedIn,
+        activeMenuItem, cartCount, user, orders,
+        layout: "layouts/profileLayout",
+        activeMenuItem:"/orders"
+      });
     } catch (error) {
       console.log(error);
     }

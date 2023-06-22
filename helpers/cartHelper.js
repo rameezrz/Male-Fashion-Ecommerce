@@ -57,6 +57,8 @@ module.exports = {
         if (cart) {
           length = cart.products.length
           resolve(length)
+        } else {
+          resolve(length)
         }
       } catch (error) {
           reject(error)
