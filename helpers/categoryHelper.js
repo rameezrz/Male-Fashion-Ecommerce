@@ -10,7 +10,7 @@ module.exports = {
     return new Promise(async (resolve, reject) => {
       try {
         const isCategory = await Category.findOne({
-          name: { $regex: new RegExp(category, "i") },
+          name: { $regex: new RegExp("^" + category + "$", "i") }
         });
         if (isCategory) {
           response.status = false;
@@ -38,7 +38,7 @@ module.exports = {
     return new Promise(async (resolve, reject) => {
       try {
         const isSubCategory = await SubCategory.findOne({
-          name: { $regex: new RegExp(subCategory, "i") },
+          name: { $regex: new RegExp("^" + subCategory + "$", "i") }
         });
         if (isSubCategory) {
           response.status = false;
