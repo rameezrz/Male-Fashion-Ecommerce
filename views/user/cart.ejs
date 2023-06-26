@@ -59,7 +59,7 @@
                                 <tr>
                                   <td class="product__cart__item">
                                       <div class="product__cart__item__pic">
-                                        <a href="/shop/product/<%= products.product._id %>"><img style="width: 70px;" src="/admin/productImgMulter/<%= products.product.images[0]  %>" alt=""></a>
+                                        <a href="/shop/product/<%= products.product._id %>"><img style="width: 70px;" src="/admin/productImgMulter/<%= products.product.images[0].filename  %>" alt=""></a>
                                       </div>
                                       <div class="product__cart__item__text">
                                         <a href="/shop/product/<%= products.product._id %>"><h6 style="max-width: 250px;"><%= products.product.productName %></h6></a>
@@ -88,24 +88,16 @@
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="cart__discount">
-                    <h6>Discount codes</h6>
-                    <form action="#" class="mb-2">
-                        <input type="text" placeholder="Coupon code" value="FLAT1000" class="text-dark fw-bold">
-                        <button type="submit">Applied</button>
-                    </form>
-                    <span class="ms-2">Voucher Applied !!!</span>
-                </div>
+
                 <div class="cart__total">
                     <h4 style="text-transform: uppercase;" class="mb-3">Cart total</h4>
                     <ul>
-                        <li>Subtotal <span>₹&nbsp; <span id="totalAmount"> <%= totalAmount %></span></span></li>
-                        <li>Discount <span class="text-success">- ₹ 1000</span></li>
-                        <hr style="background-color: #000;">
-                        <li>Total <span>₹&nbsp; <span id="totalAmount2" style="font-size: 20px;"> <%= totalAmount-1000 %></span></span></li>
+                        
+                        <li>Total <span>₹&nbsp; <span id="totalAmount2" style="font-size: 20px;"> <%= totalAmount %></span></span></li>
                     </ul>
                     <a href="/shop/checkout" class="primary-btn">Proceed to checkout</a>
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -161,8 +153,7 @@
                     const btn = document.getElementById('btn_'+productId)
                     btn.classList.remove('disabled')
                 document.getElementById(productId).innerHTML = response.productQuantity
-                document.getElementById('totalAmount').innerHTML = response.totalAmount
-                document.getElementById('totalAmount2').innerHTML = response.totalAmount-1000
+                document.getElementById('totalAmount2').innerHTML = response.totalAmount
                 var totalPriceElement = document.getElementById("total_" + productId);
                 var salePrice = parseFloat(document.getElementById('productPrice_'+productId).innerHTML);
                 var newTotalPrice = (salePrice * response.productQuantity);

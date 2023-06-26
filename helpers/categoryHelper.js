@@ -95,15 +95,22 @@ module.exports = {
     let response = {};
     return new Promise(async (resolve, reject) => {
       try {
-        const deleteSubCategory = await SubCategory.deleteOne({ _id: id });
-        if (deleteSubCategory) {
-          response.status = true;
-          response.message = `Sub-Category Deleted Successfully`;
+        const isProduct = await Product.findOne({ subCategory: id })
+        if (isProduct) {
+          response.status = false;
+          response.message = `Cannot Delete!!! Product Exist Under Category`;
           resolve(response);
         } else {
-          response.status = false;
-          response.message = `Error occured`;
-          resolve(response);
+          const deleteSubCategory = await SubCategory.deleteOne({ _id: id });
+          if (deleteSubCategory) {
+            response.status = true;
+            response.message = `Sub-Category Deleted Successfully`;
+            resolve(response);
+          } else {
+            response.status = false;
+            response.message = `Error occured`;
+            resolve(response);
+          }
         }
       } catch (error) {
         reject(error);

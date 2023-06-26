@@ -19,7 +19,7 @@
               <li class="nav-item">
                 <a class="nav-link <%= index === 0 ? 'active' : '' %>" data-toggle="tab" href="#tabs-<%= index + 1 %>"
                   role="tab">
-                  <div class="product__thumb__pic set-bg" data-setbg="/admin/productImgMulter/<%= image %>">
+                  <div class="product__thumb__pic set-bg" data-setbg="/admin/productImgMulter/<%= image.filename %>">
                   </div>
                 </a>
               </li>
@@ -30,9 +30,9 @@
           <div class="tab-content">
             <% product.images.forEach(function(image, index) { %>
               <div class="tab-pane <%= index === 0 ? 'active' : '' %>" id="tabs-<%= index + 1 %>" role="tabpanel">
-                <a href="/admin/productImgMulter/<%= image %>" style="height: 546px;width: 546px;" class="MagicZoom"
+                <a href="/admin/productImgMulter/<%= image.filename %>" style="height: 546px;width: 546px;" class="MagicZoom"
                   data-options='{"zoomWidth": 400, "zoomHeight": 400, "cssClass": "mz-show-arrows"}'><img style="height: 546px;"
-                    src="/admin/productImgMulter/<%= image %>" alt=""></a>
+                    src="/admin/productImgMulter/<%= image.filename %>" alt=""></a>
               </div>
               <% }) %>
           </div>
@@ -115,27 +115,7 @@
   </div>
 </section>
 
-<!-- Modal -->
-<div id="success_tic" class="modal fade" role="dialog">
-  <div class="modal-dialog modal-top-right">
-      <!-- Modal content-->
-      <div class="modal-content">
-          <a class="close" href="#" data-dismiss="modal">&times;</a>
-          <div class="page-body">
-              <div class="head">
-                  <h4 style="margin:5px;">Product Added to Cart</h4>
-              </div>
 
-              <h1 style="text-align:center;" class="mt-5">
-                  <div class="checkmark-circle">
-                      <div class="background"></div>
-                      <div class="checkmark draw"></div>
-                  </div>
-              </h1>
-          </div>
-      </div>
-  </div>
-</div>
 
 
 
@@ -162,16 +142,52 @@
             data:{productId},
             method:'post',
             success:(response)=>{
-                cartCount.innerHTML = response
-                $(document).ready(function() {
-                    $('#success_tic').modal('show'); // Show the modal
-
-                    setTimeout(function() {
-                    $('#success_tic').modal('hide'); // Hide the modal after 5 seconds
-                    }, 2000);
-                });
+              if(response.status){
+                        cartCount.innerHTML = response.cartCount
+                        showSuccessModal()
+                    }else{
+                        showErrorModal()
+                        setTimeout(()=>{
+                            location.href = '/user-signin';
+                        },1000)
+                    }
             }
         })
     }
+
+    function showSuccessModal() {
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: 'Product added to cart.',
+      timer: 1000, // Set the timer to 2000 milliseconds (2 seconds)
+      showConfirmButton: false, // Hide the "OK" button
+      background: '#f8f9fa', // Set a custom background color
+      iconColor: '#28a745', // Set a custom icon color
+      padding: '2rem', // Increase the padding
+      width: '300px', // Set a custom width
+      customClass: {
+        title: 'my-success-modal-title', // Add a custom CSS class to the title
+        content: 'my-success-modal-content', // Add a custom CSS class to the content
+      },
+      didOpen: () => {
+        // Custom animations or actions when the modal opens
+        // For example, you can use GSAP or CSS animations
+        // Here's an example using GSAP:
+        gsap.from('.swal-icon', { opacity: 0, scale: 0, duration: 0.5 });
+        gsap.from('.my-success-modal-title', { opacity: 0, y: -20, duration: 0.5, delay: 0.2 });
+        gsap.from('.my-success-modal-content', { opacity: 0, y: 20, duration: 0.5, delay: 0.2 });
+      },
+    });
+  }
+
+  function showErrorModal() {
+    Swal.fire({
+      icon: 'error',
+      title: 'Login Required',
+      text: 'Please Login for Add to Cart',
+      showConfirmButton: false,
+    });
+  }
 
 </script>

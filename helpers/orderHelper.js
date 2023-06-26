@@ -3,6 +3,8 @@ const Order = require('../Models/orderSchema')
 const Cart = require('../Models/cartSchema')
 const Address = require('../Models/addressSchema')
 const Product = require('../Models/productSchema')
+const Razorpay = require('razorpay') 
+const crypto = require('crypto')
 
 module.exports = {
     // placing order AJAX function
@@ -30,7 +32,6 @@ module.exports = {
                     let user = await Address.findOne({ 'deliveryAddress._id': order.savedAddress }, { 'deliveryAddress.$': 1 });
                     deliveryAddress = user.deliveryAddress[0]
                 }
-                console.log(deliveryAddress);
 
                 if (isSave) {
                     let isAddress = await Address.findOne({ user: order.userId })
@@ -45,11 +46,25 @@ module.exports = {
                         })
                         newAddress.save()
                     }
-                }
+              }
+              
+              const isCoupon = await Cart.findOne({ user: order.userId })
+              let coupon = new mongoose.Types.ObjectId();
+              let subTotal = ''
+              let discountAmount = ''
+              if (isCoupon.coupon) {
+                coupon = isCoupon.coupon
+                subTotal = isCoupon.subTotal
+                discountAmount = isCoupon.discountAmount
+                totalAmount = isCoupon.totalAmount
+              }
                 
                 let newOrder = new Order({
                     user: order.userId,
-                    paymentMethod: order.paymentMethod,
+                  paymentMethod: order.paymentMethod,
+                  coupon,
+                  subTotal,
+                    discountAmount,
                     totalAmount,
                     products: products.map(product => ({
                       ...product,
@@ -60,22 +75,25 @@ module.exports = {
                     deliveryAddress
                   });
                   
-                newOrder.save().then(async() => {
-                    await Cart.updateOne({ user: order.userId }, {
-                        $unset: { products: 1 }
-                    });
-
-                    const decreaseStock = products.map((product) => ({
-                        updateOne: {
-                          filter: { _id: product.item },
-                          update: {
-                            $inc: { stock: -product.quantity }
-                          }
+              newOrder.save().then(async (response) => {
+                if (status === 'Placed') {
+                  await Cart.findOneAndRemove({ user: order.userId })
+                  const decreaseStock = products.map((product) => ({
+                      updateOne: {
+                        filter: { _id: product.item },
+                        update: {
+                          $inc: { stock: -product.quantity }
                         }
-                      }));
+                      }
+                    }));
+                await Product.bulkWrite(decreaseStock)
+                  }
 
-                    await Product.bulkWrite(decreaseStock)
-                    resolve()
+                  let orderDetails = {
+                    orderId: response._id,
+                    totalAmount : response.totalAmount
+                  }
+                    resolve(orderDetails)
                 })
             } catch (error) {
                 reject(error)
@@ -143,5 +161,65 @@ module.exports = {
                 reject(error)
             }
         })
-    }
+  },
+    
+    //Generate Razorpay payment function
+  generateRazorpay: (orderDetails) => {
+    return new Promise((resolve, reject) => {
+        try {
+          var instance = new Razorpay({
+            key_id: process.env.RAZOR_KEY_ID,
+            key_secret: process.env.RAZOR_SECRET_KEY
+          })
+
+          let options = {
+            amount: orderDetails.totalAmount,
+            currency: "INR",
+            receipt: String(orderDetails.orderId)
+          }
+          instance.orders.create(options, (err, order) => {
+            resolve(order)
+            reject(err)
+          })
+        } catch (error) {
+          reject(error)
+        }
+      })
+  },
+  
+  //verify Razorpay payment
+  verifyPayment: (paymentDetails) => {
+    return new Promise((resolve, reject) => {
+      try {
+        let hmac = crypto.createHmac('sha256', process.env.RAZOR_SECRET_KEY)
+        hmac.update(paymentDetails.razorpay_order_id + '|' + paymentDetails.razorpay_payment_id)
+        hmac = hmac.digest('hex')
+        if (hmac == paymentDetails.razorpay_signature) {
+          resolve()
+        } else {
+          reject()
+        }
+      } catch (error) {
+        
+      }
+    })
+  },
+
+  //Change Order Status
+  changeOrderStatus: (orderId,userId) => {
+    return new Promise(async(resolve, reject) => {
+      try {
+        await Order.updateOne({ _id: orderId }, {
+          $set: {
+            "products.$[].status": "Placed"
+          }
+        }).then(async() => {
+          await Cart.findOneAndRemove({user:userId})
+          resolve()
+        })
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
 }

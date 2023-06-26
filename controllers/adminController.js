@@ -12,6 +12,8 @@ const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 const multer = require("multer");
 const sharp = require("sharp");
+const fs = require('fs/promises');
+const path = require('path');
 
 //Admin Login Page Display
 const displayLogin = (req, res) => {
@@ -276,8 +278,26 @@ const addProduct = async (req, res) => {
         return;
       }
 
+      const croppedImages = [];
+
+      for (const file of req.files) {
+        const croppedImagePath = `./public/admin/productImgMulter/${file.filename}`;
+      
+        // Perform image cropping using Sharp and save the result to a file
+        await sharp(file.path)
+          .resize(960, 1200, { fit: 'contain', background: 'white' }) // Apply fit contain and white background color
+          .toFile(croppedImagePath);
+      
+        // Push the cropped image details to an array or perform further operations
+        croppedImages.push({
+          filename: file.filename,
+          mimetype: file.mimetype,
+          path: croppedImagePath,
+        });
+      }
+      deleteAllFilesInDir('./public/admin/uploads')
       // Proceed with adding the product using the imageDetails
-      const response = await productHelper.addProduct(req.body, req.files);
+      const response = await productHelper.addProduct(req.body, croppedImages);
       if (!response.status) {
         req.flash("errorMsg", response.message);
       } else {
@@ -289,6 +309,45 @@ const addProduct = async (req, res) => {
     console.log(error);
   }
 };
+
+
+const addProductImage = (req, res) => {
+  try {
+    uploadImg.single("image")(req, res, async (error) => {
+      if (error instanceof multer.MulterError) {
+        req.flash("errorMsg", error);
+        res.redirect("/admin-panel/products");
+        return;
+      }
+    
+      if (!req.file) {
+        req.flash("errorMsg", "No valid image was uploaded.");
+        res.redirect("/admin-panel/products");
+        return;
+      }
+
+      const croppedImagePath = `./public/admin/productImgMulter/${req.file.filename}`;
+      
+      // Perform image cropping using Sharp and save the result to a file
+      await sharp(req.file.path)
+        .resize(960, 1200, { fit: 'contain', background: 'white' }) // Apply fit contain and white background color
+        .toFile(croppedImagePath);
+      
+      deleteAllFilesInDir('./public/admin/uploads')
+      
+      const { proId } = req.body
+      console.log(req.body);
+      await Product.updateOne({ _id: proId }, {
+        $push:{images:{filename:req.file.filename}}
+      })
+      res.redirect(`/admin-panel/edit-product/${proId}`)
+    })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
 
 //Display Add Product Page
 const displayAddProduct = async (req, res) => {
@@ -336,25 +395,55 @@ const displayEditProduct = async (req, res) => {
 //Edit Product
 const editProduct = async (req, res) => {
   try {
-    uploadImg.array("images", 4)(req, res, async (error) => {
-      if (error) {
-        req.flash("errorMsg", error);
-        return;
-      }
-      const imageDetails = req.files;
-      const response = await productHelper.editProduct(req.body, imageDetails);
+      const response = await productHelper.editProduct(req.body);
       if (!response.status) {
         req.flash("errorMsg", response.message);
       } else {
         req.flash("successMsg", response.message);
       }
-    });
   } catch (error) {
     console.log("error:", error);
   } finally {
     res.redirect("/admin-panel/products");
   }
 };
+
+//Edit Product Image
+const editProductImage = (req, res) => {
+  try {
+    uploadImg.single("image")(req, res, async (error) => {
+      if (error instanceof multer.MulterError) {
+        req.flash("errorMsg", error);
+        res.redirect("/admin-panel/products");
+        return;
+      }
+    
+      if (!req.file) {
+        req.flash("errorMsg", "No valid image was uploaded.");
+        res.redirect("/admin-panel/products");
+        return;
+      }
+      
+      
+      const croppedImagePath = `./public/admin/productImgMulter/${req.file.filename}`;
+      
+      // Perform image cropping using Sharp and save the result to a file
+      await sharp(req.file.path)
+      .resize(960, 1200, { fit: 'contain', background: 'white' }) // Apply fit contain and white background color
+      .toFile(croppedImagePath);
+      
+      deleteAllFilesInDir('./public/admin/uploads')
+      
+      const { proId, imgId } = req.body
+      await Product.updateOne({ _id: proId, 'images._id':imgId}, {
+        $set:{'images.$.filename':req.file.filename}
+      })
+      res.redirect(`/admin-panel/edit-product/${proId}`)
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 //Delete Product (Soft Delete)
 const deleteProduct = async (req, res) => {
@@ -367,6 +456,20 @@ const deleteProduct = async (req, res) => {
     console.log(error);
   }
 };
+
+//Delete Product Image
+const deleteProductImage = async (req, res) => {
+  try {
+    const { proId, imgId } = req.body
+    console.log(req.body);
+    await Product.updateOne({ _id: proId }, {
+      $pull:{images:{_id:imgId}}
+    })
+    res.json({status:true})
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 //Unblocking Product (Soft Delete)
 const unblockProduct = async (req, res) => {
@@ -449,6 +552,20 @@ const createJwtToken = (user) => {
   return accessToken;
 };
 
+async function deleteAllFilesInDir(dirPath) {
+  try {
+    const files = await fs.readdir(dirPath);
+
+    const deleteFilePromises = files.map(file =>
+      fs.unlink(path.join(dirPath, file)),
+    );
+
+    await Promise.all(deleteFilePromises);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 module.exports = {
   displayLogin,
   postLogin,
@@ -463,12 +580,15 @@ module.exports = {
   getSubCategory,
   displayProducts,
   addProduct,
+  addProductImage,
   displayAddProduct,
   displayEditProduct,
   editProduct,
+  editProductImage,
   displayAddCategories,
   displayAddSubCategories,
   deleteProduct,
+  deleteProductImage,
   unblockProduct,
   displayOrders,
   orderDetails,

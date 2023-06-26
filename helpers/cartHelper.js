@@ -108,7 +108,6 @@ module.exports = {
     return new Promise(async(resolve, reject) => {
       try {
         const {stock} = await Product.findOne({ _id: productId }, { _id: 0, stock: 1 })
-        console.log(stock);
         if (count == -1 && quantity == 1) {
             cannotDelete=true
             resolve({cannotDelete})

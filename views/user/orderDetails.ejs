@@ -16,6 +16,10 @@
                 <h5>Order ID </h5>
                 <h5>Date </h5>
                 <h5>Payment Mode </h5>
+                <% if(coupon!==''){ %>
+                    <h5>SubTotal </h5>
+                    <h5>Coupon </h5>
+                <% } %>
                 <h5>Total Amount </h5>
             </div>
             <div class="ms-3">
@@ -25,6 +29,10 @@
                     <h5 class="fw-bold" >Cash On Delivery</h5>
                     <% }else{ %>
                     <h5 class="fw-bold" ><%= order.paymentMethod %></h5> 
+                <% } %>
+                <% if(coupon!==''){ %>
+                    <h5>₹ <%=order.subTotal%></h5>
+                    <h5 class="text-success"><%=coupon.name%> ( - ₹ <%=order.discountAmount%>)</h5>
                 <% } %>
                 <h5 class="fw-bold" >₹ <%= order.totalAmount %></h5>
             </div>
@@ -36,7 +44,7 @@
     <% orderItems.forEach(product=>{  %>
         <div class="container py-4 mt-3 bg-white d-flex align-items-center">
             <div >
-                <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0] %>" alt="">
+                <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0].filename %>" alt="">
             </div>
             <div class="col ms-3">
                 <h5 class="mb-2"><%= product.product.productName %></h5>

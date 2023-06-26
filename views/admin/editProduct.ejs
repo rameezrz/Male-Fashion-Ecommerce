@@ -1,7 +1,6 @@
 
-<div class="col d-flex justify-content-center">
+<div class="col d-flex flex-column align-items-center">
   <form class="form w-50" action="/admin-panel/edit-product" method="POST" enctype="multipart/form-data">
-    <h4>Edit Product</h4>
     <div class="row mb-3">
       <label class="col-sm-2 col-form-label" for="basic-default-name">Name</label>
       <div class="col-sm-10">
@@ -41,40 +40,90 @@
         ><%= product.description %></textarea>
       </div>
     </div>
-    <div class="form-group mb-3">
-      <label for="selectBox" class="col-form-label">Categories</label>
-      <select class=" form-control" name="category" id="categorySelect">
-        <% categories.forEach((category) => { %>
-          <% if (selectedCategory && selectedCategory._id.toString() === category._id.toString()) { %>
-            <option value="<%= category._id %>" selected><%= category.name %></option>
-          <% } else { %>
-            <option value="<%= category._id %>"><%= category.name %></option>
-          <% } %>
-        <% }); %>
-      </select>
-    </div>
-    <div class="form-group mb-3">
-      <label for="selectBox" class="col-form-label">Choose Sub-Categories</label>
-      <select class=" form-control" name="subCategory" id="subCategorySelect">
-          <option value="<%= selectedSubCategory._id  %>"> <%= selectedSubCategory.name  %></option>
-      </select>
-    </div>
-    <div class="mb-3">
-      <label for="imageField" class="mb-3 col-form-label">Images</label>
-      <div class="row row-cols-1 row-cols-md-3 g-4 mb-3" >
-        <% product.images.forEach((image)=>{ %>
-          <div class="col" style="width: 20%;">
-            <div class="card h-100">
-              <img style="max-width: 100%" src="/admin/productImgMulter/<%=image %>" class="img-thumbnail" alt="...">
+    <div class="row mb-3">
+      <label for="selectBox" class="col-sm-2 col-form-label">Categories</label>
+      <div class="col-sm-10">
+
+        <select class=" form-control" name="category" id="categorySelect">
+          <% categories.forEach((category) => { %>
+            <% if (selectedCategory && selectedCategory._id.toString() === category._id.toString()) { %>
+              <option value="<%= category._id %>" selected><%= category.name %></option>
+              <% } else { %>
+                <option value="<%= category._id %>"><%= category.name %></option>
+                <% } %>
+                <% }); %>
+              </select>
             </div>
-          </div>
-       <% }) %>
-      </div>
-      <input type="file" class="form-control" id="imageField"  placeholder="Product Images" name="images" multiple>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <div class="row mb-3">
+      <label for="selectBox" class="col-sm-2 col-form-label">Sub-Categories</label>
+      <div class="col-sm-10">
+        <select class=" form-control" name="subCategory" id="subCategorySelect">
+          <option value="<%= selectedSubCategory._id  %>"> <%= selectedSubCategory.name  %></option>
+        </select>
+      </div>
+    </div>
+    <div class="d-grid gap-2 col-3 mx-auto">
+      <button type="submit" class="btn btn-primary mb-3">Submit</button>
+    </div>
   </form>
+    <div class="mb-3 w-50">
+      <label for="imageField" class="mb-3 col-form-label">Images</label>
+      <div class="d-flex mb-3 align-items-center" id="imageContainer">
+        <% product.images.forEach((image, index) => { %>
+          <div id="card-<%=index%>">
+            <div class="me-5 mb-3" style="width: 115px;">
+              <img src="/admin/productImgMulter/<%= image.filename %>" style="width: 100%" alt="...">
+            </div>
+            <button id="editButton-<%= index %>" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#imageEdit" data-bs-proId="<%= product._id %>" data-bs-imgId="<%= image._id %>"><i class="bx bx-edit"></i></button>
+            <button id="deleteButton-<%= index %>" class="btn btn-sm btn-danger" onclick="deleteImage('<%=product._id%>','<%=image._id%>','<%=index%>')"><i class="bx bx-trash"></i></button>
+          </div>
+        <% }) %>
+        <% if(product.images.length < 4){ %>
+          <div class="border p-5 rounded-3 container" id="addImage">
+            <form action="/admin-panel/add-product-image" method="post" enctype="multipart/form-data">
+              <input class="form-control" id="formFileSm" type="file" name="image">
+              <input type="text" id="proIdEdit" value="<%= product._id %>" name="proId" hidden>
+              <button type="submit" class="btn btn-primary mt-3">Add</button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
 </div>
+
+<div class="col-lg-4 col-md-6">
+  <div class="mt-3">
+    <!-- Modal -->
+    <div class="modal fade" id="imageEdit" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header flex-column">
+            <div class="icon-box">
+              <i class='bx bx-image-alt text-primary' style="font-size: 50px;"></i>
+            </div>
+            <h3 class="modal-title" id="modalCenterTitle">Replace Image</h3>
+          </div>
+          <form action="/admin-panel/edit-product-image" method="post" enctype="multipart/form-data">
+            <div class="d-flex flex-column align-items-center">
+              <div class="modal-body  d-flex  justify-content-center align-items-center">
+                <input class="form-control" id="formFileSm" type="file" name="image">
+                <input type="text" id="proIdEdit" name="proId" hidden>
+                <input type="text" id="imgIdEdit" name="imgId" hidden>
+              </div>
+              <div id="categoryText" class="form-text text-danger mt-n3"></div>
+            </div>
+            <div class="modal-footer mt-3 justify-content-center">
+              <button type="button" class="btn btn-outline-secondary mx-3" data-bs-dismiss="modal">Close</button>
+              <button type="submit" id="editImgButton" class="btn btn-primary">Update</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/admin/js/productFormValidation.js"></script>
 
 <script>
@@ -94,3 +143,40 @@
      });
 });
 </script>
+
+<script>
+  const deleteImage = (proId,imgId,index)=>{
+    $.ajax({
+      url:'/admin-panel/delete-product-image',
+      method:'POST',
+      data:{proId,imgId},
+      success:(response)=>{
+        if(response.status){
+          location.reload()
+        }
+      }
+    })
+  }
+  </script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  var editButtons = document.querySelectorAll('[id^="editButton-"]');
+  editButtons.forEach(function(button) {
+    button.addEventListener('click', function(event) {
+      var index = button.id.split('-')[1];
+      handleEditImage(index);
+    });
+  })
+})
+
+const handleEditImage = (index)=>{
+  console.log(index);
+  const proId = document.getElementById('editButton-'+index).getAttribute('data-bs-proId')
+  const imgId = document.getElementById('editButton-'+index).getAttribute('data-bs-imgId')
+  document.getElementById('proIdEdit').value = proId
+  document.getElementById('imgIdEdit').value = imgId
+}
+</script>
+  

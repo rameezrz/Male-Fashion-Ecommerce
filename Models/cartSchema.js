@@ -5,7 +5,13 @@ var cartSchema = new mongoose.Schema({
     user:{
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User',
-    }, products: [
+    }, coupon: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Coupon',
+    }, subTotal: String,
+    discountAmount: String,
+    totalAmount:String
+    ,products: [
         {
             item: {
                 type:mongoose.Schema.Types.ObjectId

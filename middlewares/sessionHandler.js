@@ -1,5 +1,5 @@
 const isAuth = (req, res, next)=>{
-    if (req.session.userName) {
+    if (req.session.user) {
         res.redirect('/')
     } else {
         next()

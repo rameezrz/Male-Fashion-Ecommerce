@@ -39,8 +39,11 @@ router.post('/remove-product', isLoggedIn, validateToken, cartController.removeP
 
 //Checkout Route
 router.get('/shop/checkout', isLoggedIn, validateToken, cartController.displayCheckout)
+router.get('/shop/checkout/apply-coupon/:id', isLoggedIn, validateToken, cartController.applyCoupon)
+router.get('/shop/checkout/remove-coupon/:id', isLoggedIn, validateToken, cartController.removeCoupon)
 router.post('/place-order', isLoggedIn, validateToken, orderController.placeOrder)
 router.get('/order-success', isLoggedIn, validateToken, orderController.orderSuccess)
+router.post('/verify-payment', isLoggedIn, validateToken, orderController.verifyPayment)
 
 //profile Route
 router.get('/profile',isLoggedIn,validateToken,userController.displayProfile)

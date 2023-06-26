@@ -1,0 +1,456 @@
+
+<!-- flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<!-- flatpickr JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<%- include('../partials/messages') %>
+
+<div class=" d-flex justify-content-center">
+<div class=" mb-5 py-4 px-5 border rounded" style="width: 70%;">
+    <form action="/admin-panel/add-coupon" method="post">
+        <div class="row g-5 mb-3">
+            <div class="col">
+                <label for="" class="form-label">Coupon Code</label>
+                <input type="text" class="form-control" name="name" placeholder="NEWUSER10" aria-label="First name" oninput="convertToUppercase(this)">
+                <small class="form-text text-danger" id="couponCodeError"></small>
+              </div>
+              <div class="col">
+                <label for="" class="form-label">Min. Purchase</label>
+                <input type="text" class="form-control" name="minPurchase" placeholder="500" aria-label="Last name">
+                <small class="form-text text-danger" id="minPurchaseError"></small>
+              </div>
+            </div>
+            <div class="row g-5">
+              <div class="col ">
+                <label for="" class="form-label">Discount (%)</label>
+                <input type="text" class="form-control" name="discount" placeholder="10" aria-label="First name">
+                <small class="form-text text-danger" id="discountError"></small>
+              </div>
+              <div class="col ">
+                <label for="" class="form-label">Max. Discount (₹)</label>
+                <input type="text" class="form-control" name="maxDiscount" placeholder="5000" aria-label="First name">
+                <small class="form-text text-danger" id="maxDiscountError"></small>
+              </div>
+              <div class="col">
+                <label for="datepicker" class="form-label">Select Date</label>
+                <input type="text" class="form-control" name="expiry" id="datepicker" placeholder="25/12/2023" required>
+                <small class="form-text text-danger" id="expiryError"></small>
+            </div>          
+        </div>
+        <div class="d-grid col-2 mt-4 mx-auto">
+            <button class="btn btn-primary" type="submit">Add Coupon</button>
+        </div>
+    </form>
+</div>
+</div>
+  
+  <div class="card">
+    <h5 class="card-header" style="border-bottom: 1px solid #cecece;">Available Coupons</h5>
+    <div class="table-responsive text-nowrap px-5 py-4">
+      <table class="table" id="myTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Min. Purchase</th>
+            <th>Discount (%)</th>
+            <th>Max. Discount</th>
+            <th>Expiry</th>
+            <th>Active</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+          <% coupons.forEach((coupon,index)=>{ %>
+            <tr>
+              <td><%= index+1 %></td>
+              <td><%= coupon.name %></td>
+              <td>₹ <%= coupon.minPurchase %></td>
+              <td><%= coupon.discount %></td>
+              <td>₹ <%= coupon.maxDiscount %></td>
+              <td><%= coupon.expiry %></td>
+              <% if(coupon.isActive){ %>
+                <td><i class="bx bxs-circle text-success"></i></td>
+                <% }else{ %>
+                  <td><i class="bx bxs-circle text-danger"></i></td>
+                <% } %>
+              
+              <td><a href="#editModal" data-bs-toggle="modal" data-bs-target="#editModal" class="text-danger"
+                data-coupon-id="<%= coupon._id %>" data-edit-url="/admin-panel/edit-coupon/<%= coupon._id %>"><i class='bx bx-edit'></i></a></td>
+              <td><a href="#modalCenter" data-bs-toggle="modal" data-bs-target="#modalCenter" class="text-danger"
+                data-coupon-id="<%= coupon._id %>"><i class='bx bx-trash'></i></a></td>
+            </tr>
+          <% }) %>
+  
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Coupon</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form action="/admin-panel/edit-coupon" method="post" id="editCouponForm">
+                <div class="">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="" class="form-label">Coupon Code</label>
+                            <input type="text" class="form-control" id="couponCodeEdit" name="name" placeholder="NEWUSER10" aria-label="First name" oninput="convertToUppercase(this)">
+                            <small class="form-text text-danger" id="couponCodeErrorEdit"></small>
+                        </div>
+                        <div class="col">
+                            <label for="" class="form-label">Min. Purchase</label>
+                            <input type="text" class="form-control" id="minPurchaseEdit" name="minPurchase" placeholder="500" aria-label="Last name">
+                            <small class="form-text text-danger" id="minPurchaseErrorEdit"></small>
+                        </div>
+                        <div class="col">
+                            <label for="datepicker" class="form-label">Select Date</label>
+                            <input type="text" class="form-control" id="expiryEdit" name="expiry" id="datepicker" placeholder="25/12/2023" required>
+                            <small class="form-text text-danger" id="expiryErrorEdit"></small>
+                        </div>  
+                    </div>
+                    <div class="row">
+                        <div class="col ">
+                            <label for="" class="form-label">Discount (%)</label>
+                            <input type="text" class="form-control" id="discountEdit" name="discount" placeholder="10" aria-label="First name">
+                            <small class="form-text text-danger" id="discountErrorEdit"></small>
+                        </div>
+                        <div class="col ">
+                            <label for="" class="form-label">Max. Discount (₹)</label>
+                            <input type="text" class="form-control" id="maxDiscountEdit" name="maxDiscount" placeholder="5000" aria-label="First name">
+                            <input type="text" class="form-control" id="couponIdEdit" name="id" placeholder="5000" hidden>
+                            <small class="form-text text-danger" id="maxDiscountErrorEdit"></small>
+                        </div>
+                        <div class="col">
+                            <label for="" class="form-label">Active</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" name="isActive" type="checkbox" id="activeEdit" role="switch" id="flexSwitchCheckChecked" checked>
+                            </div>
+                            <small class="form-text" id="">Toggle to enable/disable</small>
+                        </div>        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <div class="col-lg-4 col-md-6">
+    <div class="mt-3">
+      <!-- Modal -->
+      <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header flex-column">
+              <div class="icon-box">
+                <i class='bx bx-message-alt-x text-danger' style="font-size: 50px;"></i>
+              </div>
+              <h3 class="modal-title" id="modalCenterTitle">Are you sure?</h3>
+            </div>
+            <div class="modal-body text-center">
+              <p>Do you really want to delete this Coupon?</p>
+            </div>
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-outline-secondary mx-3" data-bs-dismiss="modal">Close</button>
+              <a href="" id="deleteCouponButton" class="btn btn-danger">Delete</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    var editButtons = document.querySelectorAll('[data-bs-target="#editModal"]');
+    editButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            var editUrl = this.getAttribute("data-edit-url");
+            $.ajax({
+                url: editUrl,
+                method: 'GET',
+                success: (response) => {
+                    document.getElementById('couponCodeEdit').value = response.name
+                    document.getElementById('minPurchaseEdit').value = response.minPurchase
+                    document.getElementById('discountEdit').value = response.discount
+                    document.getElementById('maxDiscountEdit').value = response.maxDiscount
+                    document.getElementById('expiryEdit').value = response.expiry
+                    document.getElementById('couponIdEdit').value = response._id
+                    if(!response.isActive){
+                      document.getElementById('activeEdit').removeAttribute('checked')
+                    }
+                }
+            })
+        });
+    });
+  </script>
+
+  <script>
+    // Add event listener to modal delete button
+    document.getElementById('modalCenter').addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const couponId = button.getAttribute('data-coupon-id');
+      const deleteButton = document.getElementById('deleteCouponButton');
+      deleteButton.href = `/admin-panel/delete-coupon/${couponId}`;
+    });
+  </script>
+
+  <script>
+    function convertToUppercase(input) {
+  input.value = input.value.toUpperCase();
+  }
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      flatpickr("#datepicker", {
+        dateFormat: "d/m/Y", // Set the desired date format
+      });
+    });
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const form = document.querySelector("form");
+      const couponCodeInput = document.querySelector("input[name='name']");
+      const minPurchaseInput = document.querySelector("input[name='minPurchase']");
+      const discountInput = document.querySelector("input[name='discount']");
+      const maxDiscountInput = document.querySelector("input[name='maxDiscount']");
+      const expiryInput = document.querySelector("input[name='expiry']");
+      const couponCodeError = document.getElementById('couponCodeError')
+      const minPurchaseError = document.getElementById('minPurchaseError')
+      const discountError = document.getElementById('discountError')
+      const maxDiscountError = document.getElementById('maxDiscountError')
+      const expiryError = document.getElementById('expiryError')
+
+      couponCodeInput.addEventListener("input", validateCouponCode);
+      minPurchaseInput.addEventListener("input", validateMinPurchase);
+      discountInput.addEventListener("input", validateDiscount);
+      maxDiscountInput.addEventListener("input", validateMaxDiscount);
+      expiryInput.addEventListener("input", validateExpiry);
+  
+      form.addEventListener("submit", function(event) {
+        // Reset previous error messages
+  
+        // Perform final validation before form submission
+        const couponCodeValid = validateCouponCode()
+      const minPurchaseValid = validateMinPurchase();
+      const discountValid = validateDiscount();
+      const maxDiscountValid = validateMaxDiscount();
+      const expiryValid = validateExpiry();
+
+      // Check if there are any error messages
+      if (!couponCodeValid || !minPurchaseValid || !discountValid || !maxDiscountValid || !expiryValid) {
+        event.preventDefault();
+        return
+      }
+    });
+  
+      function validateCouponCode() {
+        if (!couponCodeInput.value) {
+          couponCodeError.innerHTML = "Coupon code is required"
+          return false  
+        } else {
+          couponCodeError.innerHTML = ""
+          return true
+        }
+      }
+  
+      function validateMinPurchase() {
+        const minPurchaseValue = parseFloat(minPurchaseInput.value);
+        if (isNaN(minPurchaseValue)) {
+          minPurchaseError.innerHTML = "Min. Purchase must be a number"
+          return false
+        } else if(minPurchaseValue <= 100){
+          minPurchaseError.innerHTML = "Min. Purchase should be above Rs 100."
+          return false
+        }else {
+          minPurchaseError.innerHTML = ""
+          return true
+        }
+      }
+  
+      function validateDiscount() {
+        const discountValue = parseFloat(discountInput.value);
+        if (isNaN(discountValue)) {
+          discountError.innerHTML = "Discount must be in percentage"
+          return false
+        }else if(discountValue < 1 || discountValue > 100){
+          discountError.innerHTML = "Discount must be between 1 and 100."
+          return false
+        } else {
+          discountError.innerHTML = ""
+          return true
+        }
+      }
+  
+      function validateMaxDiscount() {
+        const maxDiscountValue = parseFloat(maxDiscountInput.value);
+        if (isNaN(maxDiscountValue)) {
+          maxDiscountError.innerHTML = "Max Discount must be Number"
+          return false
+        }else if(maxDiscountValue < 100){
+          maxDiscountError.innerHTML = "Discount must be above 100."
+          return false
+        } else {
+          maxDiscountError.innerHTML = ""
+          return true
+        }
+      }
+  
+      function validateExpiry() {
+      const today = new Date();
+      const expiryValue = new Date(expiryInput.value);
+      expiryValue.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+       if(expiryValue <= today){
+        expiryError.innerHTML = "Expiry date should be selected from the next day of adding the coupon.";
+        return false
+      } else {
+        expiryError.innerHTML = "";
+        return true;
+      }
+    }
+  
+    });
+  </script>
+  
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector("#editCouponForm");
+        const couponCodeInput = document.querySelector("#couponCodeEdit");
+        const minPurchaseInput = document.querySelector("#minPurchaseEdit");
+        const discountInput = document.querySelector("#discountEdit");
+        const maxDiscountInput = document.querySelector("#maxDiscountEdit");
+        const expiryInput = document.querySelector("#expiryEdit");
+        const couponCodeError = document.getElementById('couponCodeErrorEdit');
+        const minPurchaseError = document.getElementById('minPurchaseErrorEdit');
+        const discountError = document.getElementById('discountErrorEdit');
+        const maxDiscountError = document.getElementById('maxDiscountErrorEdit');
+        const expiryError = document.getElementById('expiryErrorEdit');
+
+        couponCodeInput.addEventListener("input", validateCouponCode);
+        minPurchaseInput.addEventListener("input", validateMinPurchase);
+        discountInput.addEventListener("input", validateDiscount);
+        maxDiscountInput.addEventListener("input", validateMaxDiscount);
+        expiryInput.addEventListener("input", validateExpiry);
+
+        form.addEventListener("submit", function(event) {
+            // Reset previous error messages
+
+            // Perform final validation before form submission
+            const couponCodeValid = validateCouponCode();
+            const minPurchaseValid = validateMinPurchase();
+            const discountValid = validateDiscount();
+            const maxDiscountValid = validateMaxDiscount();
+            const expiryValid = validateExpiry();
+
+            // Check if there are any error messages
+            if (!couponCodeValid || !minPurchaseValid || !discountValid || !maxDiscountValid || !expiryValid) {
+                event.preventDefault();
+                return;
+            }
+        });
+
+        function validateCouponCode() {
+            if (!couponCodeInput.value) {
+                couponCodeError.textContent = "Coupon code is required";
+                return false;
+            } else {
+                couponCodeError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateMinPurchase() {
+            const minPurchaseValue = parseFloat(minPurchaseInput.value);
+            if (isNaN(minPurchaseValue)) {
+                minPurchaseError.textContent = "Min. Purchase must be a number";
+                return false;
+            } else if (minPurchaseValue <= 100) {
+                minPurchaseError.textContent = "Min. Purchase should be above Rs 100.";
+                return false;
+            } else {
+                minPurchaseError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateDiscount() {
+            const discountValue = parseFloat(discountInput.value);
+            if (isNaN(discountValue)) {
+                discountError.textContent = "Discount must be in percentage";
+                return false;
+            } else if (discountValue < 1 || discountValue > 100) {
+                discountError.textContent = "Discount must be between 1 and 100.";
+                return false;
+            } else {
+                discountError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateMaxDiscount() {
+            const maxDiscountValue = parseFloat(maxDiscountInput.value);
+            if (isNaN(maxDiscountValue)) {
+                maxDiscountError.textContent = "Max Discount must be Number";
+                return false;
+            } else if (maxDiscountValue < 100) {
+                maxDiscountError.textContent = "Discount must be above 100.";
+                return false;
+            } else {
+                maxDiscountError.textContent = "";
+                return true;
+            }
+        }
+
+        function validateExpiry() {
+            const today = new Date();
+            const expiryValue = new Date(expiryInput.value);
+            expiryValue.setHours(0, 0, 0, 0); // Set time to midnight for comparison
+            if (expiryValue <= today) {
+                expiryError.textContent = "Expiry date should be selected from the next day of adding the coupon.";
+                return false;
+            } else {
+                expiryError.textContent = "";
+                return true;
+            }
+        }
+    });
+</script>
+
+
+  
+
+<script>
+  $(document).ready(function () {
+
+    var scriptPromise = $.getScript("/admin/libs/data-table/datatables.min.js");
+
+
+
+    scriptPromise.done(function () {
+      $('#myTable').DataTable();
+    });
+
+    scriptPromise.fail(function () {
+      console.error("Failed to load DataTables script.");
+    });
+  });
+</script>
+
+
+  
+  

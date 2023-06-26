@@ -37,9 +37,11 @@ var productSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'subCategory',
     },
-    images: {
-        type:Array
-    },
+    images: [
+        {
+           filename:String 
+        }
+    ],
     isRemoved: {
         type: Boolean,
         default:false

@@ -21,9 +21,13 @@ module.exports = {
             salePrice,
             stock,
             description,
-            images: imageDetails.map((image) => image.filename),
             category: productData.category,
             subCategory: productData.subCategory,
+            images: imageDetails.map((image) => {
+              return {
+                filename: image.filename,
+              };
+            }),
           });
 
           newProduct.save().then((product) => {
@@ -40,29 +44,12 @@ module.exports = {
   },
 
   //editing Product from admin side
-  editProduct: (productData, imageDetails) => {
+  editProduct: (productData) => {
     const { productName, brand, productPrice, salePrice, stock, description } =
       productData;
     return new Promise(async (resolve, reject) => {
       try {
-        let updatedProduct;
-        if (imageDetails.length > 0) {
-          updatedProduct = await Product.updateOne(
-            { _id: productData.id },
-            {
-              productName,
-              brand,
-              productPrice,
-              salePrice,
-              stock,
-              description,
-              images: imageDetails.map((image) => image.filename),
-              category: productData.category,
-              subCategory: productData.subCategory,
-            }
-          );
-        } else {
-          updatedProduct = await Product.updateOne(
+          let updatedProduct = await Product.updateOne(
             { _id: productData.id },
             {
               productName,
@@ -75,7 +62,6 @@ module.exports = {
               subCategory: productData.subCategory,
             }
           );
-        }
 
         let response = {};
         if (updatedProduct) {

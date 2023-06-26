@@ -6,9 +6,13 @@ var orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    totalAmount: {
-      type: Number,
+    coupon: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupon",
     },
+    subTotal: String,
+    discountAmount: String,
+    totalAmount: String,
     paymentMethod: {
       type: String,
     },
@@ -16,7 +20,7 @@ var orderSchema = new mongoose.Schema(
       {
         item: {
           type: mongoose.Schema.Types.ObjectId,
-          ref:'Product'
+          ref: "Product",
         },
         quantity: {
           type: Number,
@@ -24,8 +28,8 @@ var orderSchema = new mongoose.Schema(
         status: String,
         reason: String,
         date: {
-          type: Date
-        }
+          type: Date,
+        },
       },
     ],
     deliveryAddress: {
