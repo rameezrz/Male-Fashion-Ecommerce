@@ -11,6 +11,7 @@ router.post('/login', adminController.postLogin)
 
 //Dashboard
 router.get('/',validateToken, adminController.dashboard)
+router.get('/dashboard-data',validateToken, adminController.getDashboardChartData)
 
 
 //User Management Routes
@@ -44,6 +45,7 @@ router.get('/unblock-product/:id', validateToken, adminController.unblockProduct
 //Order Routes
 router.get('/orders',validateToken,adminController.displayOrders)
 router.get('/order-detail/:id',validateToken,adminController.orderDetails)
+router.post('/order-detail/delivered',validateToken,adminController.deliverOrder)
 router.post('/order-cancel', validateToken, adminController.cancelOrder)
 
 //Coupon Routes

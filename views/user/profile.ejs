@@ -1,15 +1,93 @@
 <h4 class="mb-5 p-3 pl-4 rounded-2 text-white fw-bold shadow-sm" style="background-color: #616161;">Personal Details</h4>
-<div class="d-flex">
-    <img src="user/img/gifs/user-account.gif" style="height: 180px;" alt="">
-    <div class="border ms-4 p-4 rounded-3 bg-light ">
-        <h4><span class="fs-5 me-2">Name : </span>
+<div class="d-flex container">
+    <div class="col-3">
+        <img src="user/img/gifs/user-account.gif" style="width: 180px;" alt="">
+    </div>
+    <div style="width: 100%;">
+        <div class="ms-4 bg-dark rounded-3 p-3 container mb-3">
+            <h4 class="text-white mb-n1">Wallet</h4>
+            <div class="d-flex  align-items-end">
+
+                <h5 class="text-white d-inline">Balance : ₹ <%= wallet.balance %></h5>
+                <button data-bs-toggle="modal" data-bs-target="#transactions" class="btn btn-sm btn-light ms-4">Transactions</button>
+            </div>
+
+        </div>
+    <div class="border ms-4 p-4 rounded-3 bg-light container">
+        <h4 class="mb-3"><span class="fs-5 me-2">Name : </span>
             <%= user.name %>
         </h4>
-        <h4><span class="fs-5 me-2">Email : </span>
+        <hr class="bg-dark">
+        <h4 class="mb-3"><span class="fs-5 me-2 ">Email : </span>
             <%= user.email %>
         </h4>
-        <h4><span class="fs-5 me-2">Phone : </span>
+        <hr class="bg-dark">
+        <h4 class="mb-3"><span class="fs-5 me-2">Phone : </span>
             <%= user.phone %>
         </h4>
+        <% if(address!=''){ %>
+            <hr class="bg-dark">
+            <div class="d-flex align-items-start">
+                <h4 class=""><span class="fs-5 me-2">Address : </span>
+                </h4>
+                <div class="mt-1">
+                    <h5 class="fw-bold d-inline">
+                        <%= address.firstName %>
+                        <%= address.lastName %>
+                    </h5>
+                    <p class="">
+                        <%= address.phone %>
+                    </p>
+                    <p style="max-width: 300px;" class="mt-n3">
+                        <%= address.address1 %>, <%= address.address2 %>, <%= address.city %>,
+                        <%= address.state %>, <%= address.country %> - <span class="fw-bold">
+                            <%= address.pincode %>
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <% } %>
+    </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="transactions" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Transactions</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <div class="container">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Txn. Id</th>
+                                <th>Type</th>
+                                <th class="text-end">Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% wallet.transactions.reverse().forEach(transaction=>{ %>
+                                <tr>
+                                    <td><%= transaction._id %></td>
+                                    <% if(transaction.type === 'debit'){ %>
+                                        <td class="text-danger"><%= transaction.type %></td>
+                                        <td class="text-end">- ₹ <%= transaction.amount %></td>
+                                        <% }else{ %>
+                                            <td class="text-success"><%= transaction.type %></td>
+                                            <td class="text-end">+ ₹ <%= transaction.amount %></td>
+                                        <% } %>
+                                    <td><%= transaction.timestamp.toLocaleDateString() %> , <%= transaction.timestamp.toLocaleTimeString() %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

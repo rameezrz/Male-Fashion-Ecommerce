@@ -14,11 +14,12 @@ const placeOrder = async (req, res) => {
     orderHelper
       .placeOrder(order, cart.products, totalAmount)
       .then((orderDetails) => {
-        if (req.body.paymentMethod === "COD") {
+        if (req.body.paymentMethod === "COD" || req.body.paymentMethod === "WALLET") {
           res.json({ placed: true });
         } else {
           orderHelper.generateRazorpay(orderDetails).then((response) => {
-            res.json(response);
+            console.log('razorpay called');
+            res.json({placed:false, response});
           });
         }
       });
@@ -137,6 +138,17 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+
+//return products from the order
+const returnOrder = async (req, res) => {
+  try {
+    await orderHelper.returnOrderProducts(req.body);
+    res.json(true);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 module.exports = {
   placeOrder,
   verifyPayment,
@@ -144,4 +156,5 @@ module.exports = {
   displayOrders,
   orderDetails,
   cancelOrder,
+  returnOrder
 };

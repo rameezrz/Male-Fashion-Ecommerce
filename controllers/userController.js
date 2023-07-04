@@ -3,12 +3,36 @@ const cartHelper = require('../helpers/cartHelper')
 const User = require('../Models/userSchema')
 const Product = require("../Models/productSchema");
 const Category = require("../Models/categorySchema");
+const SubCategory = require("../Models/subCategorySchema");
+const Cart = require('../Models/cartSchema')
+const Wallet = require('../Models/walletSchema')
+const Address = require('../Models/addressSchema')
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken); 
 const bcrypt = require('bcrypt')
 
+
+
+const generateResult = (items) => {
+  let html = ''
+  items.forEach(item => {
+    html+= `<div class="col-lg-4 col-md-6 col-sm-6">
+    <div class="product__item">
+        <a href="/shop/product/${item._id}"><div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/${item.images[0].filename}">
+        </div></a>
+        <div class="product__item__text">
+            <h6 style="color: #b19975;font-weight: 800;">${ item.brand }</h6>
+            <h6>${item.productName}</h6>
+            <input type="text" id="isUserLoggedIn" value="${ item.isUserLoggedIn }" hidden>
+            <a href="#" id="addToCart" onclick="addToCart('${item._id}'),event.preventDefault()" class="add-cart">+ Add To Cart</a>
+            <h5 class="d-inline">₹${ item.salePrice  } </h5><p style="color: #b19975;" class="text-decoration-line-through d-inline">₹${ item.productPrice  }</p>
+        </div>
+    </div>
+</div>`
+  });
+}
 
 //Display home Page
 const baseRoute = async(req, res) => { 
@@ -18,7 +42,10 @@ const baseRoute = async(req, res) => {
     const activeMenuItem = "/home";
     let cartCount = 0
     if (isUserLoggedIn) {
+      let isCart = await Cart.findOne({ user: req.session.user._id })
+    if (isCart) {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
     }
     res.render("user/index", { userName, isUserLoggedIn, activeMenuItem, cartCount });
   } catch (error) {
@@ -211,9 +238,115 @@ const displayShop = async (req, res) => {
   try {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
     const userName = isUserLoggedIn ? req.session.userName : "";
-    const products = await Product.find({ isRemoved: false });
+
+    const pageNum = req.query.pageNum
+    const perPage = 6
+    let docCount;
+    const products = await Product.find()
+      .countDocuments()
+      .then((documents) => {
+        docCount = documents
+        return Product.find()
+        .skip((pageNum - 1)*perPage)
+        .limit(perPage)
+      })
     const brandList = await Product.distinct("brand");
     const categories = await Category.find();
+    const subCategories = await SubCategory.find();
+    const activeMenuItem = "/shop";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
+    res.render("user/shop2", {
+      userName,
+      isUserLoggedIn,
+      products,
+      activeMenuItem,
+      categories,
+      subCategories,
+      brandList,
+      cartCount,
+      currentPage: pageNum,
+      totalDocuments: docCount,
+      pages:Math.ceil(docCount/perPage)
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//Displaying Products to the User by sorting and filtering
+const displayShopByFilters = async (req, res) => {
+  try {
+    console.log("apiiii");
+    const isUserLoggedIn = req.session.isUserLoggedIn || false;
+    const userName = isUserLoggedIn ? req.session.userName : "";
+
+    let query = [
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categories"
+        }
+      },
+      { $unwind: "$categories" }
+    ];
+
+    if (req.query.searchKeyword && req.query.searchKeyword !== "") {
+      query.push({
+        $match: {
+          $or: [
+            {
+              product_name: { $regex: req.query.searchKeyword, $options: "i" }
+            }
+          ]
+        }
+      });
+    }
+
+    if (req.query.category && req.query.category !== "") {
+      query.push({
+        $match: { "categories._id": req.query.category }
+      });
+    }
+
+    // let sortField = req.query.sortBy;
+    // let sortQuery = {};
+
+    // if (sortField === "price_low") {
+    //   sortQuery = { "categories.name": 1, product_price: 1 };
+    // } else if (sortField === "price_high") {
+    //   sortQuery = { "categories.name": 1, product_price: -1 };
+    // }
+
+    // if (Object.keys(sortQuery).length > 0) {
+    //   query.push({ $sort: sortQuery });
+    // }
+
+    console.log(query,'----------------');
+
+    let result = await Product.aggregate(query);
+    console.log(result,'result')
+    let shopItems = generateResult(result)
+    console.log(shopItems);
+
+    const pageNum = req.query.pageNum
+    const perPage = 6
+    let docCount;
+    const products = await Product.find()
+      .countDocuments()
+      .then((documents) => {
+        docCount = documents
+        return Product.find()
+        .skip((pageNum - 1)*perPage)
+        .limit(perPage)
+      })
+    const brandList = await Product.distinct("brand");
+    const categories = await Category.find();
+    const subCategories = await SubCategory.find();
     const activeMenuItem = "/shop";
     let cartCount = 0
     if (isUserLoggedIn) {
@@ -225,13 +358,20 @@ const displayShop = async (req, res) => {
       products,
       activeMenuItem,
       categories,
+      subCategories,
       brandList,
-      cartCount
+      shopItems:shopItems,
+      cartCount,
+      currentPage: pageNum,
+      totalDocuments: docCount,
+      pages:Math.ceil(docCount/perPage)
     });
   } catch (error) {
     console.log(error);
   }
 };
+
+
 
 
 //Sorting Products based on Category
@@ -324,11 +464,18 @@ const displayProfile = async(req, res) => {
     const user=req.session.user
     const activeMenuItem = "/home";
     let cartCount = 0
+    let wallet = await Wallet.findOne({ user: user._id })
+    let address = await Address.findOne({ user: user._id })
+    if (address) {
+      address = address.deliveryAddress[0]
+    } else {
+      address =''
+    }
     if (isUserLoggedIn) {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
     res.render("user/profile", {
-      userName, isUserLoggedIn,
+      userName, isUserLoggedIn,wallet,address,
       activeMenuItem, cartCount, user,
       layout: "layouts/profileLayout",
       activeMenuItem:"/profile"
@@ -435,6 +582,7 @@ module.exports = {
   resendOtp,
   signIn,
   displayShop,
+  displayShopByFilters,
   shopByCategory,
   shopByBrand,
   displayProduct,

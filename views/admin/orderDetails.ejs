@@ -36,7 +36,7 @@
     <% orderItems.forEach(product=>{  %>
         <div class="container shadow-sm py-4 mt-3 bg-white d-flex align-items-center">
             <div >
-                <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0] %>" alt="">
+                <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0].filename %>" alt="">
             </div>
             <div class="col ms-3">
                 <h5 class="mb-2 fs-6" style="max-width: 125px;"><%= product.product.productName %></h5>
@@ -71,18 +71,18 @@
                             <input type="text" id="itemId" value="<%= product.item %>" hidden>
                             <input type="text" id="quantity" value="<%= product.quantity %>" hidden>
                             <div class="dropdown-menu">
-                                <% if(product.status==="Cancelled"){ %>
+                                <% if(product.status==="Cancelled" || product.status==="Delivered"){ %>
                                     <a class="dropdown-item disabled" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModal" 
-                                      ><i class="bx bx-trash me-1"></i> Cancel</a
+                                      ><i class="bx bx-trash me-1"></i> Cancel Order</a
                                     >
                                     <a class="dropdown-item disabled" href="javascript:void(0);"
                                       ><i class="bx bx-package me-1"></i> Mark as 'Delivered'</a
                                     >
                                     <% }else{ %>
                                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModal" 
-                                          ><i class="bx bx-trash me-1"></i> Cancel</a
+                                          ><i class="bx bx-trash me-1"></i> Cancel Order</a
                                         >
-                                        <a class="dropdown-item" href="javascript:void(0);"
+                                        <a class="dropdown-item" href="javascript:void(0);" id="deliveredBtn"
                                           ><i class="bx bx-package me-1"></i> Mark as 'Delivered'</a
                                         >
 
@@ -143,6 +143,22 @@
             }
         })
     }
+
+    document.getElementById('deliveredBtn').addEventListener('click',(e)=>{
+        const orderId = document.getElementById('orderId').value
+        const itemId = document.getElementById('itemId').value
+        $.ajax({
+            url:'/admin-panel/order-detail/delivered',
+            method:'POST',
+            data:{orderId,itemId},
+            success:(response)=>{
+                if(response){
+                    location.href=`/admin-panel/order-detail/${orderId}`
+                }
+            }
+        })
+    })
+
 const myModal = document.getElementById('myModal')
 const myInput = document.getElementById('myInput')
 

@@ -3,6 +3,7 @@ const Order = require('../Models/orderSchema')
 const Cart = require('../Models/cartSchema')
 const Address = require('../Models/addressSchema')
 const Product = require('../Models/productSchema')
+const Wallet = require('../Models/walletSchema')
 const Razorpay = require('razorpay') 
 const crypto = require('crypto')
 
@@ -11,7 +12,7 @@ module.exports = {
     placeOrder: (order, products, totalAmount) => {
         return new Promise(async(resolve, reject) => {
             try {
-                let status = order.paymentMethod === 'COD' ? 'Placed' : 'Pending'
+                let status = order.paymentMethod === 'COD' || order.paymentMethod === 'WALLET'? 'Placed' : 'Pending'
                 let isSave = order.isSave === 'on' ? true : false
                 let isSavedAddress = order.savedAddress ? true : false
                 let deliveryAddress =  {
@@ -87,7 +88,20 @@ module.exports = {
                       }
                     }));
                 await Product.bulkWrite(decreaseStock)
-                  }
+                }
+                
+                if (order.paymentMethod === 'WALLET') {
+                  await Wallet.updateOne({ user: order.userId }, {
+                    $inc: { balance: -totalAmount },
+                    $push: {
+                      transactions: {
+                        type: 'debit',
+                        amount: totalAmount,
+                        timestamp: Date.now()
+                      }
+                    }
+                  })
+                }
 
                   let orderDetails = {
                     orderId: response._id,
@@ -145,13 +159,40 @@ module.exports = {
     cancelOrderProducts: (order) => {
         return new Promise(async(resolve, reject) => {
             try {
-                await Order.findOneAndUpdate({ _id: order.orderId,'products.item':order.itemId }, {
+                let orderDB = await Order.findOneAndUpdate({ _id: order.orderId,'products.item':order.itemId }, {
                     $set: {
                         'products.$.status': 'Cancelled',
                         'products.$.reason':order.reason,
                         'products.$.date':Date.now()
                     }
                 })
+              console.log(orderDB);
+              if (orderDB.paymentMethod != 'COD') {
+                const discountAmount = orderDB.discountAmount
+                const productId = orderDB.products[0].item
+                const quantity = orderDB.products[0].quantity
+                const product = await Product.findById(productId)
+                let walletAmount = 0
+                if (discountAmount != '') {
+                  walletAmount = (product.salePrice*quantity)-discountAmount
+                } else {
+                  walletAmount = (product.salePrice*quantity)
+                }
+                await Wallet.updateOne(
+                  { user: orderDB.user },
+                  {
+                    $inc: { balance: walletAmount },
+                    $push: {
+                      transactions: {
+                        type: 'credit',
+                        amount: walletAmount,
+                        timestamp: Date.now()
+                      }
+                    }
+                  }
+                );
+              }
+              
                 const quantity = parseInt(order.quantity)
                 await Product.findOneAndUpdate({ _id: order.itemId }, {
                     $inc:{stock:quantity}
@@ -163,6 +204,52 @@ module.exports = {
         })
   },
     
+    //cancel order products
+    returnOrderProducts: (order) => {
+      return new Promise(async(resolve, reject) => {
+          try {
+              let orderDB = await Order.findOneAndUpdate({ _id: order.orderId,'products.item':order.itemId }, {
+                  $set: {
+                      'products.$.status': 'Returned',
+                      'products.$.reason':order.reason,
+                      'products.$.date':Date.now()
+                  }
+              })
+              const discountAmount = orderDB.discountAmount
+              const productId = orderDB.products[0].item
+              const orderQuantity = orderDB.products[0].quantity
+              const product = await Product.findById(productId)
+              let walletAmount = 0
+              if (discountAmount != '') {
+                walletAmount = (product.salePrice*orderQuantity)-discountAmount
+              } else {
+                walletAmount = (product.salePrice*orderQuantity)
+              }
+              await Wallet.updateOne(
+                { user: orderDB.user },
+                {
+                  $inc: { balance: walletAmount },
+                  $push: {
+                    transactions: {
+                      type: 'credit',
+                      amount: walletAmount,
+                      timestamp: Date.now()
+                    }
+                  }
+                }
+              );
+            
+              const quantity = parseInt(order.quantity)
+              await Product.findOneAndUpdate({ _id: order.itemId }, {
+                  $inc:{stock:quantity}
+              })
+              resolve()
+          } catch (error) {
+              reject(error)
+          }
+      })
+},
+    
     //Generate Razorpay payment function
   generateRazorpay: (orderDetails) => {
     return new Promise((resolve, reject) => {
@@ -173,11 +260,12 @@ module.exports = {
           })
 
           let options = {
-            amount: orderDetails.totalAmount,
+            amount: orderDetails.totalAmount*100,
             currency: "INR",
             receipt: String(orderDetails.orderId)
           }
           instance.orders.create(options, (err, order) => {
+            console.log(order);
             resolve(order)
             reject(err)
           })

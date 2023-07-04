@@ -168,7 +168,7 @@
                 <input type="text" value="<%= totalAmount %>" id="subTotal" hidden>
                 <li>Discount <small class="text-dark" id="couponName"></small> <span id="discount" class="text-success">-</span></li>
                 <li class="mt-n3 mb-n2 d-none" id="removeBtn"><span> <a href="#" id="removeCouponLink" data-remove-url="/shop/checkout/remove-coupon/<%= user._id %>" class="text-danger">Remove</a></span></li>
-                <li class="mt-2">Total <span style="font-size: 20px;" id="totalAmount">₹ <%= totalAmount %></span></li>
+                <li class="mt-2">Total <span style="font-size: 20px;" >₹&nbsp;<span id="totalAmount"><%= totalAmount %></span></span></li>
               </ul>
 
 
@@ -181,8 +181,12 @@
                 </div>
 
                 <div>
-                  <input type="radio" id="dewey" name="paymentMethod" value="PAYPAL">
-                  <label for="dewey" class="ms-2">Paypal</label>
+                    <% if(totalAmount>wallet.balance){ %>
+                        <input type="radio" id="wallet" name="paymentMethod" value="WALLET" disabled>
+                        <% }else{ %>
+                            <input type="radio" id="wallet" name="paymentMethod" value="WALLET">
+                            <% } %>
+                  <label for="dewey" class="ms-2">Wallet (₹ <%= wallet.balance %>)</label>
                 </div>
 
                 <div>
@@ -200,6 +204,8 @@
 </section>
 <!-- Checkout Section End -->
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
     const removeCouponLink = document.getElementById('removeCouponLink')
     removeCouponLink.addEventListener('click',(e)=>{
@@ -213,7 +219,7 @@
                 document.getElementById('removeBtn').classList.add('d-none')
                     document.getElementById('discount').innerHTML = `` 
                     document.getElementById('couponName').innerHTML = `` 
-                    document.getElementById('totalAmount').innerHTML = ` ₹ ${subTotal}` 
+                    document.getElementById('totalAmount').innerHTML = ` ${subTotal}` 
                     document.getElementById('couponApplied').innerHTML = ''
             }
         })
@@ -242,7 +248,7 @@
           if (response.placed) {
             location.href = '/order-success';
           } else {
-            loadRazorpay(response);
+            loadRazorpay(response.response);
           }
         }
       });
@@ -286,7 +292,7 @@
       
         function updateCouponApplied(response) {
           document.getElementById('couponName').innerHTML = `(${response.coupon.name})`;
-          document.getElementById('totalAmount').innerHTML = `₹ ${response.cart.totalAmount}`;
+          document.getElementById('totalAmount').innerHTML = ` ${response.cart.totalAmount}`;
           document.getElementById('discount').innerHTML = `- ₹ ${response.cart.discountAmount}`;
           document.getElementById('couponApplied').classList.remove('text-danger');
           document.getElementById('removeBtn').classList.remove('d-none');
@@ -297,24 +303,25 @@
           document.getElementById('removeBtn').classList.add('d-none');
           document.getElementById('discount').innerHTML = '';
           document.getElementById('couponName').innerHTML = '';
-          document.getElementById('totalAmount').innerHTML = `₹ ${response.subTotal}`;
+          document.getElementById('totalAmount').innerHTML = ` ${response.subTotal}`;
           document.getElementById('couponApplied').classList.add('text-danger');
           document.getElementById('couponApplied').innerHTML = response.message;
         }
       </script>
       
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-
-
+      
+      
+      
+      
 
 
 <script>
   const loadRazorpay = (orderDetails) => {
+    console.log(orderDetails);
     var options = {
       "key": "rzp_test_boeHmbbU7kIXo1", // Enter the Key ID generated from the Dashboard
-      "amount": (orderDetails.amount * 100), // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+      "amount": orderDetails.amount , // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
       "currency": "INR",
       "name": "Rzee Media", //your business name
       "description": "Test Transaction",

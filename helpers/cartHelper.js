@@ -19,7 +19,7 @@ module.exports = {
           );
           if (productExist != -1) {
             Cart.updateOne(
-              {user:userId, "products.item": productId },
+              {user:userId, "products.item": productId},
               {
                 $inc: { "products.$.quantity": 1 },
               }

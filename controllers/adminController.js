@@ -2,11 +2,12 @@ const User = require("../Models/userSchema");
 const Product = require("../Models/productSchema");
 const Admin = require("../Models/adminSchema");
 const Order = require("../Models/orderSchema");
-const categoryHelper = require("../helpers/categoryHelper");
-const orderHelper = require("../helpers/orderHelper");
 const Category = require("../Models/categorySchema");
 const SubCategory = require("../Models/subCategorySchema");
+const categoryHelper = require("../helpers/categoryHelper");
+const orderHelper = require("../helpers/orderHelper");
 const productHelper = require("../helpers/productHelper");
+const adminHelper = require('../helpers/adminHelper')
 const uploadImg = require("../middlewares/uploadImg");
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
@@ -62,18 +63,31 @@ const postLogin = async (req, res) => {
 };
 
 //display Admin Dashboard
-const dashboard = (req, res) => {
+const dashboard = async(req, res) => {
   try {
+    const data = await adminHelper.getDashboardData()
+    // console.log(data);
     const activeMenuItem = "/admin_panel";
     res.render("admin/indexAdmin", {
       title: "Admin Dashboard",
       layout: "layouts/adminLayout",
       activeMenuItem,
+      data
     });
   } catch (error) {
     console.log(error);
   }
 };
+
+//dashboard chart data
+const getDashboardChartData = async (req, res) => {
+  try {
+    const categories = await adminHelper.getCategories()
+    res.json(categories)
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 //display Users
 const displayUsers = async (req, res) => {
@@ -519,6 +533,25 @@ const orderDetails = async (req, res) => {
   }
 };
 
+//Deliver Order
+const deliverOrder = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.body
+    console.log(req.body);
+    await Order.findOneAndUpdate({ _id: orderId,'products.item':itemId }, {
+      $set: {
+          'products.$.status': 'Delivered',
+          'products.$.reason':'from Admin Side',
+          'products.$.date':Date.now()
+      }
+    }).then(() => {
+    res.json(true)
+  })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 //Cancel Order
 const cancelOrder = async (req, res) => {
   try {
@@ -570,6 +603,7 @@ module.exports = {
   displayLogin,
   postLogin,
   dashboard,
+  getDashboardChartData,
   displayUsers,
   blockUser,
   UnblockUser,
@@ -592,6 +626,7 @@ module.exports = {
   unblockProduct,
   displayOrders,
   orderDetails,
+  deliverOrder,
   cancelOrder,
   logout,
 };

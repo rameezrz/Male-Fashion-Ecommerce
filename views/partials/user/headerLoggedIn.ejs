@@ -28,7 +28,7 @@
         <nav class="header__menu mobile-menu">
           <ul>
             <li class="<%= activeMenuItem === '/home' ? 'active' : '' %>"><a href="/">Home</a></li>
-            <li class="<%= activeMenuItem === '/shop' ? 'active' : '' %>"><a href="/shop">Shop</a></li>
+            <li class="<%= activeMenuItem === '/shop' ? 'active' : '' %>"><a href="/shop/?pageNum=1">Shop</a></li>
             <li><a href="#">Contacts</a></li>
             <li><a href="#">About us</a></li>
           </ul>
@@ -38,7 +38,7 @@
         <div class="header__nav__option">
           <a href="#" class="search-switch"><img src="/user/img/shopping-cart/search.svg" style="width: 20px;"
               alt=""></a>
-          <a href="#"><img src="/user/img/shopping-cart/heart.svg" style="width: 20px;" alt=""></a>
+          <a href="/profile/wishlist"><img src="/user/img/shopping-cart/heart.svg" style="width: 20px;" alt=""></a>
           <a href="/cart" class=""><img src="/user/img/shopping-cart/bag.svg" style="width: 20px;" alt="">
             <span id="cartCount" class="badge badge-success">
               <%= cartCount %>
@@ -46,7 +46,6 @@
           <a href="/profile" class="text-dark"><img src="/user/img/icon/user.svg" alt="">
             <%= userName %>
           </a>
-          <a href="/logout" class="btn btn-dark">Logout</a>
         </div>
       </div>
     </div>

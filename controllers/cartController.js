@@ -2,6 +2,7 @@ const cartHelper = require('../helpers/cartHelper')
 const Address = require('../Models/addressSchema')
 const Coupon = require('../Models/couponSchema')
 const Cart = require('../Models/cartSchema')
+const Wallet = require('../Models/walletSchema')
 
 //Adding selected product to user cart
 const addToCart = async(req, res) => {
@@ -76,6 +77,7 @@ const displayCheckout = async(req, res) => {
         if (isUserLoggedIn) {
         cartCount = await cartHelper.getCartCount(user._id)
         }
+        let wallet = await Wallet.findOne({user:user._id})
         let addresses = await Address.findOne({ user: user._id })
         addresses = addresses === null ? null : addresses.deliveryAddress
         let products = await cartHelper.getCartProducts(req.session.user._id)
@@ -95,7 +97,7 @@ const displayCheckout = async(req, res) => {
             res.redirect('/cart')
         } else {
             let totalAmount = await cartHelper.getTotalAmount(req.session.user._id)
-            res.render('user/checkout',{ isUserLoggedIn, userName,coupons, activeMenuItem, cartCount,products,totalAmount,user,addresses})
+            res.render('user/checkout',{ isUserLoggedIn, userName,coupons, activeMenuItem, cartCount,products,totalAmount,user,addresses,wallet})
         }
     } catch (error) {
         console.log(error);

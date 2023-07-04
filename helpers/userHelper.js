@@ -1,10 +1,13 @@
 const User = require("../Models/userSchema");
+const Wallet = require('../Models/walletSchema')
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken);
+
+
 
 module.exports = {
   //Finding whether user is already registered or not
@@ -44,6 +47,10 @@ module.exports = {
         newUser.password = await bcrypt.hash(password, 10);
         newUser.isBlocked = false;
         newUser.save().then((user) => {
+          const newWallet = new Wallet({
+            user:user._id
+          })
+          newWallet.save()
           resolve(user);
         });
       } catch (e) {
@@ -94,6 +101,8 @@ module.exports = {
       .services(verifySid)
       .verifications.create({ to: `+91${mob}`, channel: "sms" });
   },
+
+  
 
   //creating JWT Token to user for Authorization
   createJwtToken: (user) => {

@@ -1,0 +1,110 @@
+<link rel="stylesheet" href="/user/css/modal.css">
+
+<style>
+    .btn-customized{
+        color: #000;
+        background-color: #f3f2ee;
+        border: none;
+        font-weight: bold;
+    }
+    .btn-customized.disabled{
+        background-color: #f8f8f8;
+        opacity: 50%;
+    }
+</style>
+
+<h4 class="mb-5 p-3 pl-4 rounded-2 text-white fw-bold shadow-sm" style="background-color: #616161;">Wishlist (<%= products.length %>)</h4>
+
+<% if(products.length === 0){ %>
+    <div class="container d-flex flex-column align-items-center">
+        <img class="py-5" width="200px" src="/user/img/shopping-cart/empty-box.gif" alt="">
+        <h4>Oops! Wishlist Empty</h4>
+        <a href="/shop" class="btn btn-dark mt-4"> Continue Shopping</a>
+    </div>
+<% }else{%>
+    <!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad py-0">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="shopping__cart__table">
+                    <table>
+                        <tbody>
+                            <% products.forEach((products, index) => { %>
+                                <tr class="d-flex justify-content-between align-items-center">
+                                  <td class="product__cart__item">
+                                      <div class="product__cart__item__pic">
+                                        <a href="/shop/product/<%= products.product._id %>"><img style="width: 70px;" src="/admin/productImgMulter/<%= products.product.images[0].filename  %>" alt=""></a>
+                                      </div>
+                                      <div class="product__cart__item__text">
+                                        <a href="/shop/product/<%= products.product._id %>"><h6><%= products.product.productName %></h6></a>
+                                        <h5 class="d-inline">₹ <h5 class="d-inline" id="productPrice_<%= products.product._id %>"><%= products.product.salePrice %></h5></h5>
+                                      </div>
+                                  </td>
+                                  <td class="cart__close"><a href="#" data-toggle="modal" data-target="#success_tic" onclick="removeProduct('<%=products._id %>','<%=products.product._id %>')"><i class="fa fa-close"></i></a></td>
+                                </tr>
+                              <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="continue__btn">
+                            <a href="/shop">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Shopping Cart Section End -->
+<% } %>
+
+<!-- Modal -->
+<div id="success_tic" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-top-right">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <a class="close" href="#" data-dismiss="modal">&times;</a>
+            <div class="page-body">
+                <div class="head">
+                    <h4 style="margin:5px;">Product Removed</h4>
+                </div>
+
+                <h1 style="text-align:center;" class="mt-5">
+                    <div class="checkmark-circle">
+                        <div class="background"></div>
+                        <div class="checkmark draw"></div>
+                    </div>
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+
+    
+
+    function removeProduct(wishlistId,productId){
+        $.ajax({
+            url:'/remove-product-wishlist',
+            data:{wishlistId,productId},
+            method:'post',
+            success:(response)=>{
+                setTimeout(()=>{
+                    location.reload()
+                },1000)
+            }
+        })
+    }
+
+    
+    
+  </script>

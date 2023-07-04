@@ -2,6 +2,8 @@
  * Dashboard Analytics
  */
 
+
+
 'use strict';
 
 (function () {
@@ -12,17 +14,23 @@
   axisColor = config.colors.axisColor;
   borderColor = config.colors.borderColor;
 
+  
+
   // Total Revenue Report Chart - Bar Chart
   // --------------------------------------------------------------------
   const totalRevenueChartEl = document.querySelector('#totalRevenueChart'),
     totalRevenueChartOptions = {
       series: [
         {
-          name: '2021',
+          name: 'Monthly Revenue',
           data: [18, 7, 15, 29, 18, 12, 9]
         },
         {
-          name: '2020',
+          name: 'Orders',
+          data: [-13, -18, -9, -14, -5, -17, -15]
+        },
+        {
+          name: 'Cancelled',
           data: [-13, -18, -9, -14, -5, -17, -15]
         }
       ],
@@ -41,7 +49,7 @@
           endingShape: 'rounded'
         }
       },
-      colors: [config.colors.primary, config.colors.info],
+      colors: [config.colors.primary, config.colors.info,config.colors.danger],
       dataLabels: {
         enabled: false
       },
@@ -420,15 +428,34 @@
 
   // Order Statistics Chart
   // --------------------------------------------------------------------
-  const chartOrderStatistics = document.querySelector('#orderStatisticsChart'),
-    orderChartConfig = {
+
+$(document).ready(() => {
+  // AJAX request to fetch the data
+  $.ajax({
+    url: '/admin-panel/dashboard-data',
+    method: 'GET',
+    success: (response) => {
+      const labels = response.map((item) => item.name);
+      const series = response.map((item) => item.productCount);
+      updateChart(labels, series);
+    },
+    error: (error) => {
+      console.log('Error:', error);
+    }
+  });
+
+  const chartOrderStatistics = document.querySelector('#orderStatisticsChart');
+
+  // Function to update the chart with new data
+  const updateChart = (labels, series) => {
+    const orderChartConfig = {
       chart: {
         height: 165,
         width: 130,
         type: 'donut'
       },
-      labels: ['Electronic', 'Sports', 'Decor', 'Fashion'],
-      series: [85, 15, 50, 50],
+      labels,
+      series,
       colors: [config.colors.primary, config.colors.secondary, config.colors.info, config.colors.success],
       stroke: {
         width: 5,
@@ -473,9 +500,9 @@
                 show: true,
                 fontSize: '0.8125rem',
                 color: axisColor,
-                label: 'Weekly',
+                label: 'Total',
                 formatter: function (w) {
-                  return '38%';
+                  return '100%';
                 }
               }
             }
@@ -483,10 +510,13 @@
         }
       }
     };
-  if (typeof chartOrderStatistics !== undefined && chartOrderStatistics !== null) {
+
+    // Create the chart
     const statisticsChart = new ApexCharts(chartOrderStatistics, orderChartConfig);
     statisticsChart.render();
-  }
+  };
+});
+
 
   // Income Chart - Area chart
   // --------------------------------------------------------------------
