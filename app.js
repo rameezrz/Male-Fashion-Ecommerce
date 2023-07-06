@@ -61,7 +61,6 @@ app.set("layout", "layouts/layout");
 
 //public folder
 app.use(express.static("public"));
-app.use(express.static("helpers"));
 
 //Routes
 app.use("/", require("./routes/userRoute"));

@@ -7,6 +7,7 @@ const SubCategory = require("../Models/subCategorySchema");
 const Cart = require('../Models/cartSchema')
 const Wallet = require('../Models/walletSchema')
 const Address = require('../Models/addressSchema')
+const Banner = require('../Models/bannerSchema')
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
@@ -40,6 +41,8 @@ const baseRoute = async(req, res) => {
     const isUserLoggedIn = req.session.isUserLoggedIn || false;
     const userName = isUserLoggedIn ? req.session.userName : "";
     const activeMenuItem = "/home";
+    let banner = await Banner.find()
+    banner = banner[0].filename
     let cartCount = 0
     if (isUserLoggedIn) {
       let isCart = await Cart.findOne({ user: req.session.user._id })
@@ -47,7 +50,7 @@ const baseRoute = async(req, res) => {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
     }
-    res.render("user/index", { userName, isUserLoggedIn, activeMenuItem, cartCount });
+    res.render("user/index", { userName, isUserLoggedIn, activeMenuItem, cartCount,banner });
   } catch (error) {
     console.log(error);
   }

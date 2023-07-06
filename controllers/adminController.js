@@ -66,7 +66,6 @@ const postLogin = async (req, res) => {
 const dashboard = async(req, res) => {
   try {
     const data = await adminHelper.getDashboardData()
-    // console.log(data);
     const activeMenuItem = "/admin_panel";
     res.render("admin/indexAdmin", {
       title: "Admin Dashboard",
@@ -82,12 +81,13 @@ const dashboard = async(req, res) => {
 //dashboard chart data
 const getDashboardChartData = async (req, res) => {
   try {
-    const categories = await adminHelper.getCategories()
-    res.json(categories)
+    const data = await adminHelper.getChartData()
+    res.json(data)
   } catch (error) {
     console.log(error);
   }
 }
+
 
 //display Users
 const displayUsers = async (req, res) => {

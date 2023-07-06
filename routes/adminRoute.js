@@ -3,6 +3,7 @@ const router = express.Router()
 const adminController = require('../controllers/adminController')
 const categoryController = require('../controllers/categoryController')
 const couponController = require('../controllers/couponController')
+const bannerController = require('../controllers/bannerController')
 const validateToken = require("../middlewares/jwtAuthAdmin")
 
 //Auth Routes
@@ -53,7 +54,13 @@ router.get('/coupon',validateToken,couponController.displayCoupon)
 router.post('/add-coupon',validateToken,couponController.addCoupon)
 router.get('/edit-coupon/:id',validateToken,couponController.displayEditCoupon)
 router.post('/edit-coupon',validateToken,couponController.editCoupon)
-router.get('/delete-coupon/:id',validateToken,couponController.deleteCoupon)
+router.get('/delete-coupon/:id', validateToken, couponController.deleteCoupon)
+
+//Banner Routes
+router.get('/banner', validateToken, bannerController.displayBannerManagement)
+router.post('/banner', validateToken, bannerController.addBanner)
+
+
 
 //Logout 
 router.get('/logout',validateToken,adminController.logout)
