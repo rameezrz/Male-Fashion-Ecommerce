@@ -27,8 +27,15 @@ var orderSchema = new mongoose.Schema(
         },
         status: String,
         reason: String,
+        rating: {
+          type:Number
+      },
+      review: {
+          type:String
+      },
         date: {
           type: Date,
+          default:Date.now()
         },
       },
     ],

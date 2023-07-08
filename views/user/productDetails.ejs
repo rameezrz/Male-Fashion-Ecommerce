@@ -1,7 +1,37 @@
 <link rel="stylesheet" href="/user/css/modal.css">
+<style>
+  .rating-stars {
+  display: inline-block;
+}
+
+.star {
+  font-size: 24px;
+  cursor: pointer;
+  color: #ffcc00;
+}
+
+#horizontal-profile::-webkit-scrollbar {
+  width: 8px; /* Set the width of the scroll bar */
+}
+
+#horizontal-profile::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Set the background color of the scroll bar track */
+}
+
+#horizontal-profile::-webkit-scrollbar-thumb {
+  background-color: #888; /* Set the color of the scroll bar thumb */
+}
+
+#horizontal-profile::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Set the color of the scroll bar thumb on hover */
+}
+
+
+
+</style>
 
 <section class="shop-details">
-  <div class="product__details__pic">
+  <div class="product__details__pic mb-3">
     <div class="container">
       <div class="row">
         <div class="col-lg-12 d-flex justify-content-start">
@@ -83,36 +113,77 @@
     </div>
 
   </div>
-  <div class="product__details__content">
+  <div class="product__details__content my-5 py-3">
     <div class="container">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="product__details__tab">
-            <ul class="nav nav-tabs" role="tablist">
-              <li class="nav-item">
-                <p class="nav-link active">Description</p>
-              </li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pan active">
-                <div class="product__details__tab__content">
-                  <div class="product__details__tab__content__item">
-                    <h5>Product Infomation</h5>
-                    <p class="mb-5">
-                      <%= product.description %>
-                    </p>
-
-                  </div>
-
-                </div>
-              </div>
-
+      <div class="col">
+        <div class="demo-inline-spacing mt-3">
+          <div class="" style="border-bottom: 1px solid #000; width: 100%;">
+          <div class="list-group list-group-horizontal-md text-md-center col-6"  >
+            <style>
+              .list-group-item.active{
+                background-color: #111111;
+                border-color: #111111;
+              }
+            </style>
+            <a
+              class="list-group-item list-group-item-action active"
+              id="home-list-item"
+              data-bs-toggle="list"
+              href="#horizontal-home"
+              style="border: none;"
+              >Description</a
+            >
+            <a
+              class="list-group-item list-group-item-action "
+              id="profile-list-item"
+              data-bs-toggle="list"
+              href="#horizontal-profile"
+              style="border: none;"
+              >Reviews (<%= review.length %>)</a
+            >
+          </div>
+        </div>
+          <div class="tab-content px-0 mt-4">
+            <div class="tab-pane fade show active" id="horizontal-home">
+              <h5 class="mb-3">Product Information</h5>
+              <%= product.description %>
             </div>
+            <div class="tab-pane fade " id="horizontal-profile" style="max-height: 500px; overflow: auto; scroll-behavior: smooth;">
+              <% if(review.length){ %>
+              <% review.forEach(review=>{ %>
+                <div class="container bg-light p-3 rounded-3 mb-3">
+                  <div class="rating-stars mb-2">
+                    <% for(let i=0;i<review.rating;i++){ %>
+                      <span class="star" ><i class="fa-solid fa-star"></i></span>
+                  <% } %>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <h5 class=""><%= review.userName %></h5>
+                    <i class="bx bx-check-circle fs-5 ms-1"></i>
+                    <p class="ms-2 mb-0" style="opacity: 80%;">Certified Buyer</p>
+                  </div>
+                  <hr style="background-color: #000; margin: 10px 0;">
+                  <div>
+                    <h5><%= review.reviewText %></h5>
+                  </div>
+                  <p class="mb-0 mt-2" style="opacity: 80%;"><%= review.timestamp.toLocaleDateString('en-US',{weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) %></p>
+                </div>
+              <% }) %>
+              <% }else{ %>
+                <div class="container d-flex justify-content-center align-items-center bg-light" style="height: 150px;">
+                  <h5>No Reviews</h5>
+                </div>
+                <% } %>
+            </div>
+            
           </div>
         </div>
       </div>
     </div>
+    
   </div>
+
+  
 </section>
 
 

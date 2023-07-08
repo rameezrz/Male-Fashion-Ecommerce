@@ -12,7 +12,8 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken); 
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const productHelper = require("../helpers/productHelper");
 
 
 
@@ -444,13 +445,16 @@ const displayProduct = async (req, res) => {
     if (isUserLoggedIn) {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
+    const review = await productHelper.getProductReviews(product._id)
+    console.log(review);
     res.render("user/productDetails", {
       userName,
       isUserLoggedIn,
       product,
       category,
       activeMenuItem,
-      cartCount
+      cartCount,
+      review
     });
   } catch (error) {
     console.log(error);

@@ -186,7 +186,7 @@
                         <% }else{ %>
                             <input type="radio" id="wallet" name="paymentMethod" value="WALLET">
                             <% } %>
-                  <label for="dewey" class="ms-2">Wallet (₹ <%= wallet.balance %>)</label>
+                  <label for="dewey" class="ms-2">Wallet (<%= wallet.balance.toLocaleString(undefined, { style: 'currency', currency: 'INR' }) %>)</label>
                 </div>
 
                 <div>

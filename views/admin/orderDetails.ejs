@@ -82,7 +82,7 @@
                                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModal" 
                                           ><i class="bx bx-trash me-1"></i> Cancel Order</a
                                         >
-                                        <a class="dropdown-item" href="javascript:void(0);" id="deliveredBtn"
+                                        <a class="dropdown-item deliveredBtn" href="#" data-product-id="<%= product.item %>" 
                                           ><i class="bx bx-package me-1"></i> Mark as 'Delivered'</a
                                         >
 
@@ -144,9 +144,11 @@
         })
     }
 
-    document.getElementById('deliveredBtn').addEventListener('click',(e)=>{
-        const orderId = document.getElementById('orderId').value
-        const itemId = document.getElementById('itemId').value
+    document.querySelectorAll('.deliveredBtn').forEach((button)=>{
+        button.addEventListener('click',(event)=>{
+            event.preventDefault()
+            const itemId = event.target.dataset.productId;
+            const orderId = document.getElementById('orderId').value
         $.ajax({
             url:'/admin-panel/order-detail/delivered',
             method:'POST',
@@ -158,6 +160,8 @@
             }
         })
     })
+    })
+    
 
 const myModal = document.getElementById('myModal')
 const myInput = document.getElementById('myInput')

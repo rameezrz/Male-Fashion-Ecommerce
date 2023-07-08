@@ -130,19 +130,21 @@
                 <div class="row">
                     <% products.forEach(product => { %>
                             <div class="col-lg-4 col-md-6 col-sm-6">
-                                <div class="product__item">
-                                    <a href="/shop/product/<%=product._id %>"><div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/<%=product.images[0].filename %>">
-                                      <ul class="product__hover">
+                              <div class="product__item">
+                                  <a href="/shop/product/<%=product._id %>">
+                                  <div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/<%=product.images[0].filename %>">
+                                      <!-- <ul class="product__hover">
                                         <li><a href="#" onclick="addToWishlist('<%= product._id%>'), event.preventDefault()"><img src="/user/img/icon/heart.png" alt=""><span>Wishlist</span></a></li>
-                                    </ul>
-                                    </div></a>
-                                    <div class="product__item__text">
-                                        <h6 style="color: #b19975;font-weight: 800;"><%= product.brand %></h6>
-                                        <h6><%= product.productName%></h6>
-                                        <input type="text" id="isUserLoggedIn" value="<%= isUserLoggedIn  %>" hidden>
-                                        <a href="#" id="addToCart" onclick="addToCart('<%=product._id%>'),event.preventDefault()" class="add-cart">+ Add To Cart</a>
-                                        <h5 class="d-inline">₹<%= product.salePrice  %> </h5><p style="color: #b19975;" class="text-decoration-line-through d-inline">₹<%= product.productPrice  %></p>
-                                    </div>
+                                    </ul> -->
+                                  </div>
+                                </a>
+                                  <div class="product__item__text">
+                                    <h6 style="color: #b19975;font-weight: 800;"><%= product.brand %></h6>
+                                    <h6><%= product.productName%></h6>
+                                    <input type="text" id="isUserLoggedIn" value="<%= isUserLoggedIn  %>" hidden>
+                                    <a href="#" id="addToCart" onclick="addToCart('<%=product._id%>'),event.preventDefault()" class="add-cart">+ Add To Cart</a>
+                                    <h5 class="d-inline">₹<%= product.salePrice  %> </h5><p style="color: #b19975;" class="text-decoration-line-through d-inline">₹<%= product.productPrice  %></p>
+                                  </div>
                                 </div>
                             </div>
                    <% }); %>

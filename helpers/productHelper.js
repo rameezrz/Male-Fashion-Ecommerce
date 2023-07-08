@@ -1,4 +1,6 @@
 const Product = require("../Models/productSchema");
+const Review = require('../Models/reviewSchema')
+const mongoose = require('mongoose')
 
 module.exports = {
   //Adding new Products to database from admin side
@@ -83,4 +85,49 @@ module.exports = {
       }
     });
   },
+
+  
+
+  getProductReviews: (productId) => {
+    return new Promise(async(resolve, reject) => {
+      try {
+        const proId = new mongoose.Types.ObjectId(productId)
+        const productReviewAggregate = await Review.aggregate([
+          {
+            $match: { product: proId } // Replace 'productId' with the actual product ID
+          },
+          {
+            $unwind: '$review'
+          },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'review.user',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          {
+            $unwind: '$user'
+          },
+          {
+            $project: {
+              _id: 0,
+              rating: '$review.rating',
+              reviewText: '$review.review',
+              userName: '$user.name',
+              timestamp: '$review.timestamp'
+            }
+          }
+        ]);
+        
+        
+        
+        
+        resolve(productReviewAggregate)
+      } catch (error) {
+        console.log(error);
+      }
+    })
+  }
 };

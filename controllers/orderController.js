@@ -113,6 +113,7 @@ const orderDetails = async (req, res) => {
       coupon = await Coupon.findById(order.coupon)
     }
     const orderItems = await orderHelper.getOrderProducts(orderId);
+    console.log(orderItems);
     res.render("user/orderDetails", {
       userName,
       isUserLoggedIn,

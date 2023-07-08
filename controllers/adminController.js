@@ -518,7 +518,6 @@ const orderDetails = async (req, res) => {
   try {
     const activeMenuItem = "/order_history";
     const orderId = req.params.id;
-    console.log(orderId);
     const order = await Order.findById(orderId);
     const orderItems = await orderHelper.getOrderProducts(orderId);
     res.render("admin/orderDetails", {
@@ -538,6 +537,7 @@ const deliverOrder = async (req, res) => {
   try {
     const { orderId, itemId } = req.body
     console.log(req.body);
+    console.log('-------------------------------',req.body);
     await Order.findOneAndUpdate({ _id: orderId,'products.item':itemId }, {
       $set: {
           'products.$.status': 'Delivered',

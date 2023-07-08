@@ -42,43 +42,69 @@
         <h4>Products</h4>
     </div>
     <% orderItems.forEach(product=>{  %>
-        <div class="container py-4 mt-3 bg-white d-flex align-items-center">
-            <div >
-                <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0].filename %>" alt="">
+        <div class="container py-4 mt-3 bg-white">
+            <div class=" d-flex align-items-center">
+                <div >
+                    <img style="width: 100px;" src="/admin/productImgMulter/<%=product.product.images[0].filename %>" alt="">
+                </div>
+                <div class="col ms-3">
+                    <h5 class="mb-2"><%= product.product.productName %></h5>
+                </div>
+                <div class="col">
+                    <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
+                </div>
+                <div class="col">
+                    <h5 class="fw-bold mb-2"><%= product.quantity %></h5>
+                </div>
+                <div class="col">
+                    <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
+                </div>
+                <div class="col">
+                    <input type="text" id="orderId" value="<%= product._id %>" hidden>
+                        <input type="text" id="itemId" value="<%= product.item %>" hidden>
+                        <input type="text" id="quantity" value="<%= product.quantity %>" hidden>
+                    <% if(product.status==='Cancelled'){ %>
+                        <h5 class="fw-bold mb-2 text-danger" id="status"><%= product.status %></h5>
+                        <h6>Reason : <%= product.reason %></h6>
+                        <% }else if(product.status==='Delivered'){ %>
+                            <h5 class="fw-bold mb-2 text-success"><%= product.status %></h5>
+                            <% if(!product.rating){ %>
+                            <p style="cursor: pointer;" class="text-primary addReviewBtn" data-bs-toggle="modal" data-bs-target="#reviewModal" data-product-id="<%= product.item %>">Write a review</p>
+                            <% } %>
+                            <% }else{ %>
+                                <h5 class="fw-bold mb-2 text-success"><%= product.status %></h5>
+                                <% } %>
+                        </div>
+                        <div class="col">
+                            <% if(product.status==='Placed'){ %>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">Cancel</button>
+                        <% }else if(product.status==='Delivered'){ %>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#returnModal">Return</button>
+                            <% }else{ %>
+                            <h5 class="fw-bold mb-2">on <%= product.date.toLocaleDateString()  %></h5>
+                            <% } %>
+                        </div>
             </div>
-            <div class="col ms-3">
-                <h5 class="mb-2"><%= product.product.productName %></h5>
-            </div>
-            <div class="col">
-                <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
-            </div>
-            <div class="col">
-                <h5 class="fw-bold mb-2"><%= product.quantity %></h5>
-            </div>
-            <div class="col">
-                <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
-            </div>
-            <div class="col">
-                <input type="text" id="orderId" value="<%= product._id %>" hidden>
-                    <input type="text" id="itemId" value="<%= product.item %>" hidden>
-                    <input type="text" id="quantity" value="<%= product.quantity %>" hidden>
-                <% if(product.status==='Cancelled'){ %>
-                    <h5 class="fw-bold mb-2 text-danger" id="status"><%= product.status %></h5>
-                    <h6>Reason : <%= product.reason %></h6>
-                    <% }else{ %>
-                        <h5 class="fw-bold mb-2 text-success"><%= product.status %></h5>
+            <% if(product.rating){ %>
+                <hr style="background-color: #000;">
+            <div class="mt-3 d-flex justify-content-between px-4 align-items-center">
+                <div class="">
+                    Rating : 
+                    <div class="rating-stars">
+                        <% for(let i=0;i<product.rating;i++){ %>
+                            <span class="star selected" data-star-index="1"><i class="fa-solid fa-star"></i></span>
                         <% } %>
                     </div>
-                    <div class="col">
-                        <% if(product.status==='Placed'){ %>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">Cancel</button>
-                    
-                    <% }else if(product.status==='Delivered'){ %>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#returnModal">Return</button>
-                        <% }else{ %>
-                        <h5 class="fw-bold mb-2">on <%= product.date.toLocaleDateString()  %></h5>
-                        <% } %>
-                    </div>
+                </div>
+                <div class="">
+                    <h6>Review : <%= product.review %></h6>
+                </div>
+                <div class="">
+                    <button class="btn btn-primary me-2 editReviewBtn" data-bs-toggle="modal" data-bs-target="#editReviewModal" data-edit-url="/order/edit-review/<%= product._id %>/<%= product.item %>">Edit</button>
+                    <button class="btn btn-danger" onclick="deleteReview('<%= product.item%>','<%= product._id%>')">Delete</button>
+                </div>
+            </div>
+            <% } %>
         </div>
         <% }) %>
     
@@ -88,6 +114,146 @@
     </div>
 </div>
 </div>
+
+
+<!--Edit Review Modal -->
+<div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 fw-bold" id="exampleModalLabel">Review & Rating</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="" id="editRatingForm">
+                <label for="exampleFormControlTextarea1" class="form-label">Please rate the product <span class="text-danger">*</span></label>
+                <div class="mb-3">
+                    <div class="edit-rating-stars">
+                        <input type="text" id="ratingCount" name="rating" hidden>
+                        <input type="text" hidden name="productId" id="editProductId">
+                        <input type="text" hidden name="orderId" id="editOrderId">
+                        <span class="edit-star" data-star-index="1"><i class="fa-solid fa-star"></i></span>
+                        <span class="edit-star" data-star-index="2"><i class="fa-solid fa-star"></i></span>
+                        <span class="edit-star" data-star-index="3"><i class="fa-solid fa-star"></i></span>
+                        <span class="edit-star" data-star-index="4"><i class="fa-solid fa-star"></i></span>
+                        <span class="edit-star" data-star-index="5"><i class="fa-solid fa-star"></i></span>
+                      </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Product review</label>
+                    <textarea class="form-control" id="editReviewField" rows="3" name="review"></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <style>
+          .add-rating-stars {
+  display: inline-block;
+}
+
+.star {
+  font-size: 24px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.star:hover{
+    color: #ffcc00;
+}
+
+.selected {
+  color: #ffcc00;
+}
+
+    </style>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Rating & Review</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="" id="ratingForm">
+            <label for="exampleFormControlTextarea1" class="form-label">Please rate the product <span class="text-danger">*</span></label>
+            <div class="mb-3">
+                <div class="add-rating-stars">
+                    <span class="add-star" data-star-index="1"><i class="fa-solid fa-star"></i></span>
+                    <span class="add-star" data-star-index="2"><i class="fa-solid fa-star"></i></span>
+                    <span class="add-star" data-star-index="3"><i class="fa-solid fa-star"></i></span>
+                    <span class="add-star" data-star-index="4"><i class="fa-solid fa-star"></i></span>
+                    <span class="add-star" data-star-index="5"><i class="fa-solid fa-star"></i></span>
+                  </div>
+                  <input type="text" hidden name="rating" id="productRating">
+                  <input type="text" hidden name="productId" id="productId">
+                  <input type="text" hidden name="orderId" id="orderIdReview">
+              </div>
+              <div class="mb-3">
+                <label for="exampleFormControlTextarea1" class="form-label">Product review</label>
+                <textarea class="form-control" id="" rows="3" name="review"></textarea>
+              </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        </div>
+      </div>
+    </div>
+    <script>
+            const addStars = document.querySelectorAll('.add-star');
+            let rating = document.getElementById('productRating')
+            const itemId = document.getElementById('itemId').value
+            const orderId = document.getElementById('orderId').value
+            document.getElementById('editProductId').value = itemId
+            document.getElementById('editOrderId').value = orderId
+            document.getElementById('productId').value = itemId
+            document.getElementById('orderIdReview').value = orderId
+
+        addStars.forEach(star => {
+        star.addEventListener('click', () => {
+            const selectedStarIndex = star.getAttribute('data-star-index');
+
+            // Remove 'selected' class from all stars
+            addStars.forEach(star => star.classList.remove('selected'));
+
+            // Add 'selected' class to stars up to the selected index
+            for (let i = 0; i < selectedStarIndex; i++) {
+            addStars[i].classList.add('selected');
+            }
+
+            // Store the selected rating value or perform further actions
+            rating.value = selectedStarIndex;
+            console.log('Selected rating:', rating.value);
+        });
+        });
+
+        $('#ratingForm').submit((e)=>{
+            e.preventDefault()
+            $.ajax({
+                url:'/order/add-review',
+                method:'post',
+                data:$('#ratingForm').serialize(),
+                success:(response)=>{
+                    if(response.status){
+                        location.reload()
+                    }
+                }
+            })
+        })
+
+    </script>
+  </div>
 
 <!--Cancel Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -137,9 +303,77 @@
     .box-2 div > * {
         margin-bottom: 15px;
     }
+
+  
+
 </style>
 
 <script>
+
+    const editButtons = document.querySelectorAll('.editReviewBtn')
+
+editButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            var editUrl = this.getAttribute("data-edit-url");
+            $.ajax({
+                url: editUrl,
+                method: 'GET',
+                success: (response) => {
+                    document.getElementById('editReviewField').innerHTML = response.review[0].review
+                    document.getElementById('ratingCount').value = response.review[0].rating
+                    const editStars = document.querySelectorAll('.edit-star')
+                        let ratingCount = document.getElementById('ratingCount').value
+                        for(let i = 0;i<ratingCount;i++){
+                            editStars[i].classList.add('selected')
+                        }
+                        editStars.forEach(star => {
+                        star.addEventListener('click', () => {
+                        const selectedStarIndex = star.getAttribute('data-star-index');
+
+                        // Remove 'selected' class from all stars
+                        editStars.forEach(star => star.classList.remove('selected'));
+
+                        // Add 'selected' class to stars up to the selected index
+                        for (let i = 0; i < selectedStarIndex; i++) {
+                            editStars[i].classList.add('selected');
+                        }
+
+                        // Store the selected rating value or perform further actions
+                        document.getElementById('ratingCount').value = selectedStarIndex;
+                        console.log('Selected rating:', ratingCount);
+                    });
+                    });
+                }
+            })
+        });
+    });
+
+        $('#editRatingForm').submit((e)=>{
+            e.preventDefault()
+            $.ajax({
+                url:'/order/edit-review',
+                method:'put',
+                data:$('#editRatingForm').serialize(),
+                success:(response)=>{
+                    if(response){
+                        location.reload()
+                    }
+                }
+            })
+        })
+
+
+    const deleteReview = (productId,orderId)=>{
+        $.ajax({
+            url:'/order/delete-review',
+            method:'delete',
+            data:{productId,orderId},
+            success:(response)=>{
+                location.reload()
+            }
+        })
+    }
+
     const cancelOrder = ()=>{
         const orderId = document.getElementById('orderId').value
         const itemId = document.getElementById('itemId').value

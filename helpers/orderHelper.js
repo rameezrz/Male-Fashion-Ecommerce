@@ -134,6 +134,8 @@ module.exports = {
                 status: '$products.status',
                 reason: '$products.reason',
                 date: '$products.date',
+                rating: '$products.rating',
+                review: '$products.review',
             }
           }, {
             $lookup: {
@@ -144,7 +146,7 @@ module.exports = {
             }
           }, {
             $project: {
-              item: 1, quantity: 1, status:1,reason:1,date:1, product: { $arrayElemAt:['$productDetails',0]}
+              item: 1, quantity: 1, status:1,reason:1,date:1,rating:1,review:1, product: { $arrayElemAt:['$productDetails',0]}
             }
           }
         ]);
