@@ -224,6 +224,7 @@ const checkOtp = async (req, res) => {
       let maxAge = 60 * 60 * 24 * 3 * 1000;
       const accessToken = userHelper.createJwtToken(user);
       res.cookie("jwtToken", accessToken, { maxAge, httpOnly: true });
+      req.session.user=user
       req.session.isUserLoggedIn = true;
       req.session.userName = user.name;
       res.redirect("/");
@@ -330,7 +331,7 @@ const displayShopByFilters = async (req, res) => {
     //   query.push({ $sort: sortQuery });
     // }
 
-    console.log(query,'----------------');
+    // console.log(query,'----------------');
 
     let result = await Product.aggregate(query);
     console.log(result,'result')
@@ -356,7 +357,7 @@ const displayShopByFilters = async (req, res) => {
     if (isUserLoggedIn) {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
-    res.render("user/shop", {
+    res.render("user/shop2", {
       userName,
       isUserLoggedIn,
       products,

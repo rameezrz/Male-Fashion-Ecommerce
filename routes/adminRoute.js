@@ -49,6 +49,12 @@ router.get('/order-detail/:id',validateToken,adminController.orderDetails)
 router.post('/order-detail/delivered',validateToken,adminController.deliverOrder)
 router.post('/order-cancel', validateToken, adminController.cancelOrder)
 
+
+//Sales Reports
+router.get('/sales-report',validateToken,adminController.displaySalesReport)
+router.post('/sales-report/custom',validateToken,adminController.customSalesReport)
+
+
 //Coupon Routes
 router.get('/coupon',validateToken,couponController.displayCoupon)
 router.post('/add-coupon',validateToken,couponController.addCoupon)

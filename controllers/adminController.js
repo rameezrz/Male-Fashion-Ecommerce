@@ -8,6 +8,7 @@ const categoryHelper = require("../helpers/categoryHelper");
 const orderHelper = require("../helpers/orderHelper");
 const productHelper = require("../helpers/productHelper");
 const adminHelper = require('../helpers/adminHelper')
+const salesHelper = require('../helpers/salesHelper')
 const uploadImg = require("../middlewares/uploadImg");
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
@@ -563,6 +564,40 @@ const cancelOrder = async (req, res) => {
   }
 }
 
+//display Sales Report
+const displaySalesReport = async (req, res) => {
+  try {
+    const dailySalesReport = await salesHelper.dailySalesReport()
+    const monthlySalesReport = await salesHelper.monthlySalesReport()
+    const yearlySalesReport = await salesHelper.yearlySalesReport()
+    const users = await User.find();
+    const activeMenuItem = "/sales_report";
+    res.render("admin/salesReport", {
+      title: "Sales Report",
+      users,
+      dailySalesReport,
+      monthlySalesReport,
+      yearlySalesReport,
+      layout: "layouts/adminLayout",
+      activeMenuItem,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+//sales Report custom
+const customSalesReport = async (req, res) => {
+  try {
+    const {startDateISO,endDateISO} = req.body
+    const salesReport = await salesHelper.customSalesReport(startDateISO,endDateISO)
+    res.json(salesReport)
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 //Admin Logout
 const logout = (req, res) => {
   try {
@@ -628,5 +663,7 @@ module.exports = {
   orderDetails,
   deliverOrder,
   cancelOrder,
+  displaySalesReport,
+  customSalesReport,
   logout,
 };
