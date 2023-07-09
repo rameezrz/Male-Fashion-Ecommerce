@@ -28,6 +28,7 @@ router.get('/resend-user-otp',isAuth,userController.resendOtp)
 
 //Shop Route
 router.get('/shop', userController.displayShop)
+router.get('/shop/filter', userController.displayShopByFilters)
 router.get('/shop/category/:id',userController.shopByCategory)
 router.get('/shop/product/:id', userController.displayProduct)
 

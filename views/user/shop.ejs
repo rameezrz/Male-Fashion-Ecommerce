@@ -61,6 +61,7 @@
                                       type="search"
                                       class="input"
                                       oninput="toggleClearButton()"
+                                      onkeyup="fetchProductsDataWithPage(1)"
                                     />
                                     <span
                                       id="clearButton"
@@ -71,8 +72,8 @@
                                       &#10005;
                                     </span>
                                   </div>
-                                
-                        </div>
+                                  
+                                </div>
                     <div class="shop__sidebar__accordion">
                         <div class="accordion" id="accordionExample">
                             <div class="card">
@@ -84,7 +85,7 @@
                                         <div class="shop__sidebar__categories">
                                             <ul class="nice-scroll">
                                                 
-                                                <fieldset>
+                                                <fieldset onchange="fetchProductsDataWithPage(1)">
                                                 <% categories.forEach(category=>{ %>
                                                         <div>
                                                             <input type="radio" id="huey" name="category" value="<%= category._id %>" checked>
@@ -93,11 +94,13 @@
                                                         <% }) %>
                                                     </fieldset>
                                             </ul>
+                                          </div>
                                         </div>
+                                      </div>
                                     </div>
-                                </div>
-                            </div>
-                            <button class="site-btn" type="submit">Find</button>
+                            
+                            
+                            
                             
                         </div>
                     </div>
@@ -108,14 +111,14 @@
                     <div class="row">
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__left">
-                                <p>Showing <%= ((currentPage-1)*6)+1 %> - <%= (currentPage)*6 > totalDocuments? totalDocuments : (currentPage)*6 %> of <%= totalDocuments %> results</p>
+                                <p>Showing <span id="start"><%= ((currentPage-1)*6)+1 %></span> - <span id="end"><%= (currentPage)*6 > totalDocuments? totalDocuments : (currentPage)*6 %></span> of <span id="totalDocuments"><%= totalDocuments %></span> results</p>
                             </div>
                         </div>
                         
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="shop__product__option__right">
                                 <p>Sort by Price:</p>
-                                <select id="sortBy" name="sortBy">
+                                <select id="sortBy" name="sortBy" onchange="fetchProductsDataWithPage(1)">
                                     <option value="price_low">Low To High</option>
                                     <option value="price_high">High To Low</option>
                                 </select>
@@ -124,79 +127,120 @@
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                 <div id="resultHtml">
-                  <%= shopItems  %>
-                 </div>
-                    
-                </div>
-                
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="product__pagination">
-                            <% for(let i=1;i<=pages;i++){ %>
-                                <% if(currentPage == i){ %>
-                                    <a class="active" href="/shop/?pageNum=<%= i %>"><%= i %></a>
-                                    <% }else{ %>
-                                        <a class="" href="/shop/?pageNum=<%= i %>"><%= i %></a>
-                                        <% } %>
-                                <% } %>
+                <div class="row" id="resultHtml">
+                  <% products.forEach(product => { %>
+                    <div class="col-lg-4 col-md-6 col-sm-6">
+                      <div class="product__item">
+                          <a href="/shop/product/<%=product._id %>">
+                          <div class="product__item__pic set-bg">
+                            <img src="/admin/productImgMulter/<%=product.images[0].filename %>" alt="" style="height:260px"> 
+                          </div>
+                        </a>
+                          <div class="product__item__text">
+                            <h6 style="color: #b19975;font-weight: 800;"><%= product.brand %></h6>
+                            <h6><%= product.productName%></h6>
+                            <input type="text" id="isUserLoggedIn" value="<%= isUserLoggedIn  %>" hidden>
+                            <a href="#" id="addToCart" onclick="addToCart('<%=product._id%>'),event.preventDefault()" class="add-cart">+ Add To Cart</a>
+                            <h5 class="d-inline">₹<%= product.salePrice  %> </h5><p style="color: #b19975;" class="text-decoration-line-through d-inline">₹<%= product.productPrice  %></p>
+                          </div>
                         </div>
                     </div>
+           <% }); %>
+          </div>
+                <div class="row" >
+                    <div class="col-lg-12">
+                      <div class="product__pagination" id="paginationRow">
+                        <% for (let i = 1; i <= pages; i++) { %>
+                          <% if (currentPage == i) { %>
+                            <a class="active" href="/shop/?pageNum=<%= i %>" onclick="fetchProductsDataWithPage('<%= i %>')"><%= i %></a>
+                          <% } else { %>
+                            <a class="" href="/shop/?pageNum=<%= i %>" onclick="fetchProductsDataWithPage('<%= i %>')"><%= i %></a>
+                          <% } %>
+                        <% } %>
+                      </div>
+                      
+                    </div>
                 </div>
-            
         </div>
     </div>
 </section>
 <!-- Shop Section End -->
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
 
 <script>
-  $(document).ready(function() {
-  const {generateResult} = require('../../helpers/userHelper')
  $("#products-list-form").submit((e) => {
    e.preventDefault();
-   let searchKeyword = $('#searchItem').val().trim();
-   let category = $("input[name='category']:checked").val();
-   let sortBy = $("#sortBy").val();
-   console.log(category);
- 
-   let url = "/shop";
- 
-   let hasQueryParams = false;
- 
-   if (searchKeyword !== "") {
-     url += "?search=" + encodeURIComponent(searchKeyword);
-     hasQueryParams = true;
-   }
- 
-   if (category !== "") {
-     url += (hasQueryParams ? "&" : "?") + "category=" + encodeURIComponent(category);
-     hasQueryParams = true;
-   }
- 
-   if (sortBy !== "") {
-     url += (hasQueryParams ? "&" : "?") + "sort=" + encodeURIComponent(sortBy);
-   }
- 
-   console.log(url);
-   // Send AJAX request
-   $.ajax({
-     url: url,
-     method: "get",
-     success: function (response) {
-       console.log("hello",response);
-       const result = generateResult(response)
-       console.log(result);
-       $('resultHtml').html(result)
-     },
-     error: function (xhr, status, error) {
-       console.error(error);
-     }
-   });
+   fetchProductsDataWithPage(1)
  });
-})
+
+ function fetchProductsDataWithPage(pageNum) {
+  let searchKeyword = $('#searchItem').val().trim();
+  let category = $("input[name='category']:checked").val();
+  let sortBy = $("#sortBy").val();
+
+  let url = "/shop/filter";
+
+  let hasQueryParams = false;
+
+  if (searchKeyword !== "") {
+    url += "?search=" + encodeURIComponent(searchKeyword);
+    hasQueryParams = true;
+  }
+
+  if (category !== undefined) {
+    url += (hasQueryParams ? "&" : "?") + "category=" + encodeURIComponent(category);
+    hasQueryParams = true;
+  }
+
+  if (sortBy !== "") {
+    url += (hasQueryParams ? "&" : "?") + "sort=" + encodeURIComponent(sortBy);
+  }
+
+  // Add the pageNum parameter to the URL
+  url += (hasQueryParams ? "&" : "?") + "pageNum=" + encodeURIComponent(pageNum);
+
+  // Send AJAX request
+  $.ajax({
+    url: url,
+    method: "get",
+    success: function (response) {
+      console.log("hello", response);
+      if (!response.shopItems) {
+        document.getElementById('resultHtml').innerHTML = 'No Results Found';
+        document.getElementById('paginationRow').innerHTML = '';
+      } else {
+        document.getElementById('resultHtml').innerHTML = response.shopItems;
+        document.getElementById('totalDocuments').innerHTML = response.totalCount;
+        const pageNum = response.pageNum
+        const totalCount = response.totalCount
+        document.getElementById('start').innerHTML = ((pageNum-1)*6)+1;
+        document.getElementById('end').innerHTML = (pageNum)*6 > totalCount? totalCount : (pageNum)*6;
+        updatePaginationLinks(response.pageNum, response.totalPages);
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error(error);
+    }
+  });
+}
+
+
+
+function updatePaginationLinks(currentPage, totalPages) {
+  let paginationLinksHtml = '';
+
+  for (let i = 1; i <= totalPages; i++) {
+    if (currentPage == i) {
+      paginationLinksHtml += `<a class="active me-2" href="#" onclick="fetchProductsDataWithPage(${i})">${i}</a>`;
+    } else {
+      paginationLinksHtml += `<a class="me-2" href="#" onclick="fetchProductsDataWithPage(${i})">${i}</a>`;
+    }
+  }
+
+  document.getElementById('paginationRow').innerHTML = paginationLinksHtml;
+}
+
  
  </script>
 
@@ -217,13 +261,15 @@
       searchItem.value = "";
       toggleClearButton();
     }
+
   </script>
+
 
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>  
+<script>
     function addToCart(productId){
             let cartCount = document.getElementById('cartCount')
             $.ajax({
@@ -243,6 +289,28 @@
                 }
             })
         }
+
+        const addToWishlist = (productId)=>{
+      $.ajax({
+        url:'/add-to-wishlist',
+        data:{productId},
+        method:'post',
+        success:(response)=>{
+          if(!response.isUserLoggedIn){
+            showErrorModal()
+            setTimeout(()=>{
+             location.href = '/user-signin';
+             },1000)
+          }else{
+            if(response.status){
+              showSuccessWishlist()
+            }else{
+              showErrorWishlist()
+            }
+          }
+        }
+      })
+    }
 
     
 
@@ -280,5 +348,40 @@
       showConfirmButton: false,
     });
   }
+
+  function showErrorWishlist() {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Cannot Add',
+      text: 'Product is already in Wishlist',
+      showConfirmButton: true,
+    });
+  }
+
+  function showSuccessWishlist() {
+  Swal.fire({
+    icon: 'success',
+    title: 'Success!',
+    text: 'Product added to Wishlist.',
+    timer: 2000, // Set the timer to 2000 milliseconds (2 seconds)
+    showConfirmButton: false, // Hide the "OK" button
+    background: '#f8f9fa', // Set a custom background color
+    iconColor: '#28a745', // Set a custom icon color
+    padding: '2rem', // Increase the padding
+    width: '300px', // Set a custom width
+    customClass: {
+      title: 'my-success-modal-title', // Add a custom CSS class to the title
+      content: 'my-success-modal-content', // Add a custom CSS class to the content
+    },
+    didOpen: () => {
+      // Custom animations or actions when the modal opens
+      // For example, you can use GSAP or CSS animations
+      // Here's an example using GSAP:
+      gsap.from('.swal-icon', { opacity: 0, scale: 0, duration: 0.5 });
+      gsap.from('.my-success-modal-title', { opacity: 0, y: -20, duration: 0.5, delay: 0.2 });
+      gsap.from('.my-success-modal-content', { opacity: 0, y: 20, duration: 0.5, delay: 0.2 });
+    },
+  });
+}
 
 </script>

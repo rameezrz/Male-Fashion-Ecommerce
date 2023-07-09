@@ -1,5 +1,6 @@
 const userHelper = require("../helpers/userHelper");
 const cartHelper = require('../helpers/cartHelper')
+const productHelper = require("../helpers/productHelper");
 const User = require('../Models/userSchema')
 const Product = require("../Models/productSchema");
 const Category = require("../Models/categorySchema");
@@ -13,7 +14,8 @@ const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
 const client = require("twilio")(accountSid, authToken); 
 const bcrypt = require('bcrypt');
-const productHelper = require("../helpers/productHelper");
+const mongoose = require('mongoose')
+
 
 
 
@@ -22,8 +24,11 @@ const generateResult = (items) => {
   items.forEach(item => {
     html+= `<div class="col-lg-4 col-md-6 col-sm-6">
     <div class="product__item">
-        <a href="/shop/product/${item._id}"><div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/${item.images[0].filename}">
-        </div></a>
+        <a href="/shop/product/${item._id}">
+        <div class="product__item__pic set-bg" data-setbg="/admin/productImgMulter/${item.images[0].filename}">
+        <img src="/admin/productImgMulter/${item.images[0].filename}" alt="" style="height:260px"> 
+        </div>
+      </a>
         <div class="product__item__text">
             <h6 style="color: #b19975;font-weight: 800;">${ item.brand }</h6>
             <h6>${item.productName}</h6>
@@ -34,6 +39,7 @@ const generateResult = (items) => {
     </div>
 </div>`
   });
+  return html
 }
 
 //Display home Page
@@ -263,7 +269,7 @@ const displayShop = async (req, res) => {
     if (isUserLoggedIn) {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
-    res.render("user/shop2", {
+    res.render("user/shop", {
       userName,
       isUserLoggedIn,
       products,
@@ -284,93 +290,68 @@ const displayShop = async (req, res) => {
 //Displaying Products to the User by sorting and filtering
 const displayShopByFilters = async (req, res) => {
   try {
-    console.log("apiiii");
-    const isUserLoggedIn = req.session.isUserLoggedIn || false;
-    const userName = isUserLoggedIn ? req.session.userName : "";
+    const pageNum = req.query.pageNum;
+const perPage = 6;
+let docCount;
 
-    let query = [
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "categories"
+let query = [
+  {
+    $lookup: {
+      from: "categories",
+      localField: "category",
+      foreignField: "_id",
+      as: "categories"
+    }
+  },
+  { $unwind: "$categories" }
+];
+
+if (req.query.search && req.query.search !== "") {
+  query.push({
+    $match: {
+      $or: [
+        {
+          productName: { $regex: req.query.search, $options: "i" }
         }
-      },
-      { $unwind: "$categories" }
-    ];
-
-    if (req.query.searchKeyword && req.query.searchKeyword !== "") {
-      query.push({
-        $match: {
-          $or: [
-            {
-              product_name: { $regex: req.query.searchKeyword, $options: "i" }
-            }
-          ]
-        }
-      });
+      ]
     }
+  });
+}
 
-    if (req.query.category && req.query.category !== "") {
-      query.push({
-        $match: { "categories._id": req.query.category }
-      });
-    }
+if (req.query.category && req.query.category !== "") {
+  query.push({
+    $match: { "categories._id": new mongoose.Types.ObjectId(req.query.category) }
+  });
+}
 
-    // let sortField = req.query.sortBy;
-    // let sortQuery = {};
+let sortField = req.query.sort;
+let sortQuery = {};
 
-    // if (sortField === "price_low") {
-    //   sortQuery = { "categories.name": 1, product_price: 1 };
-    // } else if (sortField === "price_high") {
-    //   sortQuery = { "categories.name": 1, product_price: -1 };
-    // }
+if (sortField === "price_low") {
+  sortQuery = { "categories.name": 1, salePrice: 1 };
+} else if (sortField === "price_high") {
+  sortQuery = { "categories.name": 1, salePrice: -1 };
+}
 
-    // if (Object.keys(sortQuery).length > 0) {
-    //   query.push({ $sort: sortQuery });
-    // }
+if (Object.keys(sortQuery).length > 0) {
+  query.push({ $sort: sortQuery });
+}
 
-    // console.log(query,'----------------');
+const aggregateQuery = Product.aggregate(query);
+const countQuery = Product.aggregate([...query, { $count: "totalCount" }]);
 
-    let result = await Product.aggregate(query);
-    console.log(result,'result')
-    let shopItems = generateResult(result)
-    console.log(shopItems);
+const [products, totalCountResult] = await Promise.all([
+  aggregateQuery.skip((pageNum - 1) * perPage).limit(perPage),
+  countQuery
+]);
 
-    const pageNum = req.query.pageNum
-    const perPage = 6
-    let docCount;
-    const products = await Product.find()
-      .countDocuments()
-      .then((documents) => {
-        docCount = documents
-        return Product.find()
-        .skip((pageNum - 1)*perPage)
-        .limit(perPage)
-      })
-    const brandList = await Product.distinct("brand");
-    const categories = await Category.find();
-    const subCategories = await SubCategory.find();
-    const activeMenuItem = "/shop";
-    let cartCount = 0
-    if (isUserLoggedIn) {
-      cartCount = await cartHelper.getCartCount(req.session.user._id)
-    }
-    res.render("user/shop2", {
-      userName,
-      isUserLoggedIn,
-      products,
-      activeMenuItem,
-      categories,
-      subCategories,
-      brandList,
-      shopItems:shopItems,
-      cartCount,
-      currentPage: pageNum,
-      totalDocuments: docCount,
-      pages:Math.ceil(docCount/perPage)
-    });
+const totalCount = totalCountResult.length > 0 ? totalCountResult[0].totalCount : 0;
+    const totalPages = Math.ceil(totalCount / perPage);
+
+// Return the products, totalCount, and totalPages to the client
+
+    let shopItems = generateResult(products)
+    res.json({shopItems, pageNum , totalPages, totalCount})
   } catch (error) {
     console.log(error);
   }
@@ -599,4 +580,5 @@ module.exports = {
   checkPassword,
   changePassword,
   logout,
+  generateResult
 };
