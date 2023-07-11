@@ -545,6 +545,27 @@ const changePassword = async(req, res) => {
 
 }
 
+//Displaying Products to the User
+const displayContact = async (req, res) => {
+  try {
+    const isUserLoggedIn = req.session.isUserLoggedIn || false;
+    const userName = isUserLoggedIn ? req.session.userName : "";
+    const activeMenuItem = "/contact";
+    let cartCount = 0
+    if (isUserLoggedIn) {
+      cartCount = await cartHelper.getCartCount(req.session.user._id)
+    }
+    res.render("user/contact", {
+      userName,
+      isUserLoggedIn,
+      activeMenuItem,
+      cartCount,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 
 //User Logout function
@@ -579,6 +600,7 @@ module.exports = {
   displayChangePassword,
   checkPassword,
   changePassword,
+  displayContact,
   logout,
   generateResult
 };

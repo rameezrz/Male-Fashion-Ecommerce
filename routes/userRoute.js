@@ -33,6 +33,9 @@ router.get('/shop/category/:id',userController.shopByCategory)
 router.get('/shop/product/:id', userController.displayProduct)
 
 
+//contact Route
+router.get('/contact', userController.displayContact)
+
 //Cart Route
 router.post('/add-to-cart',isLoggedIn,validateToken,cartController.addToCart)
 router.get('/cart',isLoggedIn, validateToken, cartController.displayCart)
