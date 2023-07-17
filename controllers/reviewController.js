@@ -2,7 +2,8 @@ const Review = require('../Models/reviewSchema')
 const Order = require('../Models/orderSchema')
 
 const addReview = async(req, res) => {
-    try {
+  try {
+      console.log(req.body);
         const userId = req.session.user._id
         const { productId, orderId, rating, review } = req.body
         const reviewObj = [

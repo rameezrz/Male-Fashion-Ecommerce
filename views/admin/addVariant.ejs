@@ -1,0 +1,127 @@
+
+<%- include('../partials/messages') %>
+<div class="col d-flex justify-content-center">
+  <form class="form w-50" id="productForm" action="/admin-panel/add-variant" method="post">
+    <h4>Add Variant</h4>
+    <div class="form-group mb-3">
+      <label for="selectBox" class="">Choose Product</label>
+      <select class="form-control" name="product" id="categorySelect" required>
+        <% products.forEach((product) => { %>
+          <option value="<%= product._id %>"> <%= product.productName %></option>
+        <% }); %>
+      </select>
+    </div>
+    <div class="form-group mb-3">
+      <input type="text" class="form-control" id="exampleInputEmail1"  placeholder="Product Size" name="size" required>
+    </div>
+    <div class="form-group mb-3">
+      <input type="text" class="form-control" id="exampleInputEmail1"  placeholder="Product Color" name="color" required>
+    </div>
+    <div class="mb-3">
+      <input type="number" class="form-control" id="productPrice"  placeholder="Product Price" name="productPrice" required>
+      <small id="productPriceError" class="form-text text-danger"></small>
+    </div>
+    <div class="mb-3">
+      <input type="number" class="form-control" id="salePrice"  placeholder="Product Sale Price" name="salePrice" required>
+      <small id="salePriceError" class="form-text text-danger"></small>
+    </div>
+    <div class="mb-3">
+      <input type="number" class="form-control" id="stock"  placeholder="Product Stock" name="stock" required>
+      <small id="stockError" class="form-text text-danger"></small>
+    </div>
+    <!-- <div class="mb-3">
+      <label for="imageField">Images</label>
+      <input type="file" class="form-control" id="imageField" placeholder="Product Images" name="images" multiple required>
+      <small id="imageFieldError" class="form-text text-danger"></small>
+    </div> -->
+    <button type="submit" class="btn btn-primary">Add</button>
+  </form>
+</div>
+
+
+
+<!-- <script>
+const form = document.getElementById('productForm')
+const imageField = document.getElementById('imageField');
+const imageFieldError = document.getElementById('imageFieldError');
+const salePriceError = document.getElementById('salePriceError');
+const productPriceError = document.getElementById('productPriceError');
+const stockError = document.getElementById('stockError');
+const productPriceInput = document.getElementById('productPrice');
+const salePriceInput = document.getElementById('salePrice');
+const stockInput = document.getElementById('stock');
+
+imageField.addEventListener('change', validateForm);
+productPriceInput.addEventListener('input', validateForm);
+salePriceInput.addEventListener('input', validateForm);
+stockInput.addEventListener('input', validateForm);
+form.addEventListener('submit', validateForm);
+
+function validateForm(event) {
+  // Clear previous error message
+  imageFieldError.textContent = '';
+
+  const files = Array.from(imageField.files);
+
+  // Check file count
+  if (files.length > 4) {
+    // Display error message and prevent form submission
+    imageFieldError.textContent = 'You can select up to 4 files.';
+    event.preventDefault();
+    return;
+  }
+
+  // Check each selected file
+  for (const file of files) {
+    const allowedExtensions = ['.jpg', '.jpeg', '.png'];
+    const fileExtension = file.name.toLowerCase().substr(file.name.lastIndexOf('.'));
+
+    // Check if the file extension is allowed
+    if (!allowedExtensions.includes(fileExtension)) {
+      // Display error message and prevent form submission
+      imageFieldError.textContent = 'Only JPG, JPEG, and PNG files are allowed.';
+      event.preventDefault();
+      return;
+    }
+  }
+
+  const productPrice = parseFloat(productPriceInput.value);
+  const salePrice = parseFloat(salePriceInput.value);
+  const stock = parseFloat(stockInput.value);
+
+   
+
+    if (salePrice < 1) { 
+      salePriceError.textContent = 'Sale price cannot be less than 0.';
+    event.preventDefault();
+    return;
+    }else{
+      salePriceError.textContent = '';
+    }
+
+    if (productPrice < 1) { 
+      productPriceError.textContent = 'Product price cannot be less than 0.';
+    event.preventDefault();
+    return;
+    }else{
+      productPriceError.textContent = '';
+    }
+
+    if (stock < 1) { 
+      stockError.textContent = 'Stock cannot be less than 0.';
+    event.preventDefault();
+    return;
+    }else{
+      stockError.textContent = '';
+    }
+
+    if (salePrice > productPrice) { 
+      salePriceError.textContent = 'Sale price should be less than the product price.';
+    event.preventDefault();
+    return;
+    }else{
+      salePriceError.textContent = '';
+    }
+}
+
+</script> -->

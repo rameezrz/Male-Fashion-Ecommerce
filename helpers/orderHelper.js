@@ -4,6 +4,7 @@ const Cart = require('../Models/cartSchema')
 const Address = require('../Models/addressSchema')
 const Product = require('../Models/productSchema')
 const Wallet = require('../Models/walletSchema')
+const Variant = require('../Models/variantSchema')
 const Razorpay = require('razorpay') 
 const crypto = require('crypto')
 
@@ -86,8 +87,24 @@ module.exports = {
                           $inc: { stock: -product.quantity }
                         }
                       }
-                    }));
-                await Product.bulkWrite(decreaseStock)
+                  }));
+                  const decreaseVariantStock = async (productId, variantId, quantity) => {
+                    try {
+                      await Variant.updateOne(
+                        { product: productId, "variants._id": variantId },
+                        { $inc: { "variants.$.stock": -quantity } }
+                      );
+                    } catch (error) {
+                      console.error("Error decreasing variant stock:", error);
+                    }
+                  };
+                  
+                  await Product.bulkWrite(decreaseStock)
+                  products.forEach(product => {
+                    if (product.variantId) {
+                      decreaseVariantStock(product.item,product.variantId,product.quantity)
+                    }
+                  });
                 }
                 
                 if (order.paymentMethod === 'WALLET') {
@@ -121,34 +138,105 @@ module.exports = {
             try {
                 const orderObjId = new mongoose.Types.ObjectId(orderId);
         
+              
         let orderItems = await Order.aggregate([
           {
-            $match: { _id: orderObjId }
+            $match: { _id: orderObjId },
           },
           {
-            $unwind:'$products'
-          }, {
+            $unwind: "$products",
+          },
+          {
             $project: {
-              item: '$products.item',
-              quantity:'$products.quantity',
-                status: '$products.status',
-                reason: '$products.reason',
-                date: '$products.date',
-                rating: '$products.rating',
-                review: '$products.review',
-            }
-          }, {
+              productId: "$products.item",
+              quantity: "$products.quantity",
+              variantId: "$products.variantId",
+              cartItem: "$products._id",
+              status: '$products.status',
+              reason: '$products.reason',
+              date: '$products.date',
+              rating: '$products.rating',
+              review: '$products.review',
+        
+            },
+          },
+          {
             $lookup: {
-              from: 'products',
-              localField: 'item',
-              foreignField: '_id',
-              as:'productDetails'
-            }
-          }, {
+              from: "products",
+              localField: "productId",
+              foreignField: "_id",
+              as: "productDetails",
+            },
+          },
+          {
             $project: {
-              item: 1, quantity: 1, status:1,reason:1,date:1,rating:1,review:1, product: { $arrayElemAt:['$productDetails',0]}
-            }
-          }
+              productId: 1,
+              quantity: 1,
+              variantId: 1,
+              cartItem: 1,
+              status:1,reason:1,date:1,rating:1,review:1,
+              product: { $arrayElemAt: ["$productDetails", 0] },
+            },
+          },
+          {
+            $lookup: {
+              from: "variants",
+              let: { productId: "$productId", variantId: "$variantId" }, // define variables for the current document's productId and variantId
+              pipeline: [
+                // specify a sub-pipeline that filters the variants collection
+                {
+                  $match: {
+                    // use the $toString operator to compare both fields as strings
+                    $expr: {
+                      $eq: [
+                        { $toString: "$product" }, // convert the product field to string
+                        { $toString: "$$productId" } // convert the productId variable to string
+                      ]
+                    }
+                  }
+                },
+                {
+                  $project: {
+                    // project only the variants array
+                    variants: 1
+                  }
+                },
+                {
+                  $unwind: "$variants" // deconstruct the variants array into separate documents
+                },
+                {
+                  $match: {
+                    // use the $toString operator to compare both fields as strings
+                    $expr: {
+                      $eq: [
+                        { $toString: "$variants._id" }, // convert the variants._id field to string
+                        { $toString: "$$variantId" } // convert the variantId variable to string
+                      ]
+                    }
+                  }
+                },
+                {
+                  $project: {
+                    // project only the matching variant object
+                    variant: "$variants"
+                  }
+                }
+              ],
+          
+              as: "variantDetails",
+            },
+          },
+          {
+            $project: {
+              productId: 1,
+              quantity: 1,
+              variantId : 1,
+              cartItem :1,
+              product: 1,
+              status:1,reason:1,date:1,rating:1,review:1,
+              variants : { $arrayElemAt : ["$variantDetails.variant",0] }
+            },
+          },
         ]);
                 resolve(orderItems)
             } catch (error) {
@@ -160,8 +248,9 @@ module.exports = {
     //cancel order products
     cancelOrderProducts: (order) => {
         return new Promise(async(resolve, reject) => {
-            try {
-                let orderDB = await Order.findOneAndUpdate({ _id: order.orderId,'products.item':order.itemId }, {
+          try {
+              console.log(order);
+                let orderDB = await Order.findOneAndUpdate({ _id: order.orderId,'products._id':order.cartItem }, {
                     $set: {
                         'products.$.status': 'Cancelled',
                         'products.$.reason':order.reason,
@@ -195,10 +284,20 @@ module.exports = {
                 );
               }
               
-                const quantity = parseInt(order.quantity)
-                await Product.findOneAndUpdate({ _id: order.itemId }, {
-                    $inc:{stock:quantity}
-                })
+            const quantity = parseInt(order.quantity)
+            if (order.variantId != '') {
+              await Variant.findOneAndUpdate(
+                { product: order.productId, 'variants._id': order.variantId },
+                { $inc: { 'variants.$.stock': quantity } }
+              );
+              await Product.findOneAndUpdate({ _id: order.productId }, {
+                $inc:{stock:quantity}
+              })
+            } else {
+              await Product.findOneAndUpdate({ _id: order.productId }, {
+                $inc:{stock:quantity}
+              })
+            }
                 resolve()
             } catch (error) {
                 reject(error)
@@ -210,7 +309,7 @@ module.exports = {
     returnOrderProducts: (order) => {
       return new Promise(async(resolve, reject) => {
           try {
-              let orderDB = await Order.findOneAndUpdate({ _id: order.orderId,'products.item':order.itemId }, {
+              let orderDB = await Order.findOneAndUpdate({ _id: order.orderId,'products._id':order.cartItem }, {
                   $set: {
                       'products.$.status': 'Returned',
                       'products.$.reason':order.reason,
@@ -242,9 +341,19 @@ module.exports = {
               );
             
               const quantity = parseInt(order.quantity)
-              await Product.findOneAndUpdate({ _id: order.itemId }, {
+              if (order.variantId != '') {
+                await Variant.findOneAndUpdate(
+                  { product: order.productId, 'variants._id': order.variantId },
+                  { $inc: { 'variants.$.stock': quantity } }
+                );
+                await Product.findOneAndUpdate({ _id: order.productId }, {
                   $inc:{stock:quantity}
-              })
+                })
+              } else {
+                await Product.findOneAndUpdate({ _id: order.productId }, {
+                  $inc:{stock:quantity}
+                })
+              }
               resolve()
           } catch (error) {
               reject(error)

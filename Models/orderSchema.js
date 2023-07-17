@@ -22,6 +22,9 @@ var orderSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
         },
+        variantId: {
+          type:mongoose.Schema.Types.ObjectId
+      },
         quantity: {
           type: Number,
         },

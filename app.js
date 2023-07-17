@@ -62,8 +62,25 @@ app.set("layout", "layouts/layout");
 //public folder
 app.use(express.static("public"));
 
-//Routes
-app.use("/", require("./routes/userRoute"));
-app.use("/admin-panel", require("./routes/adminRoute"));
+//User Routes
+app.use("/", require("./routes/user/base"));
+app.use("/", require("./routes/user/auth"));
+app.use("/", require("./routes/user/cart"));
+app.use("/", require("./routes/user/checkout"));
+app.use("/", require("./routes/user/profile"));
+app.use("/", require("./routes/user/shop"));
+app.use("/", require("./routes/user/wishlist"));
+
+//Admin Routes
+app.use("/admin-panel", require("./routes/admin/auth"));
+app.use("/admin-panel", require("./routes/admin/dashboard"));
+app.use("/admin-panel", require("./routes/admin/category"));
+app.use("/admin-panel", require("./routes/admin/userManagement"));
+app.use("/admin-panel", require("./routes/admin/product"));
+app.use("/admin-panel", require("./routes/admin/order"));
+app.use("/admin-panel", require("./routes/admin/salesReport"));
+app.use("/admin-panel", require("./routes/admin/variant"));
+app.use("/admin-panel", require("./routes/admin/banner"));
+app.use("/admin-panel", require("./routes/admin/coupon"));
 
 app.listen(process.env.PORT);

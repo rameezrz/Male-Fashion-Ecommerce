@@ -40,9 +40,21 @@
             </div>
             <div class="col ms-3">
                 <h5 class="mb-2 fs-6" style="max-width: 125px;"><%= product.product.productName %></h5>
+                <div>
+                    <% if(product.variants){ %>
+                        <div class="">
+                            <p class="mb-0">Size : <span class="fw-bold fs-6"><%= product.variants.size %></span></p>
+                            <p class="mb-0">Color : <span class="fw-bold fs-6"><%= product.variants.color %> %></p>
+                        </div>
+                        <% } %>
+                </div>
             </div>
             <div class="col">
-                <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
+                <% if(product.variants){ %>
+                    <h5 class="fw-bold mb-2">₹ <%= product.variants.salePrice %></h5>
+                    <% }else{ %>
+                        <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
+                        <% } %>
                 <h6 class="">(Sale Price)</h6>
             </div>
             <div class="col">
@@ -50,7 +62,11 @@
                 <h6 class="">(qty)</h6>
             </div>
             <div class="col">
-                <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
+                <% if(product.variants){ %>
+                    <h5 class="fw-bold mb-2">₹ <%= product.variants.salePrice * product.quantity %></h5>
+                    <% }else{ %>
+                        <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
+                        <% } %>
                 <h6 class="">(Total)</h6>
             </div>
             <div class="col">
@@ -82,7 +98,7 @@
                                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#exampleModal" 
                                           ><i class="bx bx-trash me-1"></i> Cancel Order</a
                                         >
-                                        <a class="dropdown-item deliveredBtn" href="#" data-product-id="<%= product.item %>" 
+                                        <a class="dropdown-item deliveredBtn" href="#" data-orderId="<%= product._id %>" data-cartItem="<%= product.cartItem %>" 
                                           ><i class="bx bx-package me-1"></i> Mark as 'Delivered'</a
                                         >
 
@@ -145,14 +161,14 @@
     }
 
     document.querySelectorAll('.deliveredBtn').forEach((button)=>{
-        button.addEventListener('click',(event)=>{
+        button.addEventListener('click',function(){
             event.preventDefault()
-            const itemId = event.target.dataset.productId;
-            const orderId = document.getElementById('orderId').value
+            const orderId = this.getAttribute('data-orderid');
+            const cartItem = this.getAttribute('data-cartitem');
         $.ajax({
             url:'/admin-panel/order-detail/delivered',
             method:'POST',
-            data:{orderId,itemId},
+            data:{orderId,cartItem},
             success:(response)=>{
                 if(response){
                     location.href=`/admin-panel/order-detail/${orderId}`

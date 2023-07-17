@@ -9,8 +9,9 @@ const addToCart = async(req, res) => {
     try {
         if (req.session.user) {
             const userId = req.session.user._id
-            const {productId} = req.body
-            await cartHelper.addToCart(userId, productId)
+            console.log(req.body);
+            const {productId,variantId} = req.body
+            await cartHelper.addToCart(userId, productId,variantId)
             let cartCount = await cartHelper.getCartCount(userId)
                 res.json({status:true,cartCount})
         } else {
@@ -33,13 +34,12 @@ const displayCart = async(req, res) => {
         cartCount = await cartHelper.getCartCount(req.session.user._id)
         }
         const userId = req.session.user._id
-        let products = await cartHelper.getCartProducts(userId)
-        
+        let cartItems = await cartHelper.getCartProducts(userId)
         let totalAmount = 0
-        if (products.length) {
+        if (cartItems.length) {
             totalAmount = await cartHelper.getTotalAmount(userId)
         }
-        res.render('user/cart', { isUserLoggedIn, userName, activeMenuItem, products, cartCount,totalAmount})
+        res.render('user/cart', { isUserLoggedIn, userName, activeMenuItem,cartItems , cartCount,totalAmount})
     } catch (error) {
         console.log(error);
     }

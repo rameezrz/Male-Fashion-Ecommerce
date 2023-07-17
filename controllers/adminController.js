@@ -536,10 +536,9 @@ const orderDetails = async (req, res) => {
 //Deliver Order
 const deliverOrder = async (req, res) => {
   try {
-    const { orderId, itemId } = req.body
+    const { orderId, cartItem } = req.body
     console.log(req.body);
-    console.log('-------------------------------',req.body);
-    await Order.findOneAndUpdate({ _id: orderId,'products.item':itemId }, {
+    await Order.findOneAndUpdate({ _id: orderId,'products._id':cartItem }, {
       $set: {
           'products.$.status': 'Delivered',
           'products.$.reason':'from Admin Side',

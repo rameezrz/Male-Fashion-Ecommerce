@@ -1,0 +1,30 @@
+const express = require('express')
+const router = express.Router()
+const userController = require('../../controllers/userController')
+const orderController = require('../../controllers/orderController')
+const addressController = require('../../controllers/addressController')
+const reviewController = require('../../controllers/reviewController')
+const validateToken = require('../../middlewares/jwtAuth')
+const isLoggedIn = require('../../middlewares/isLoggedIn')
+
+
+//profile Route
+router.get('/profile',isLoggedIn,validateToken,userController.displayProfile)
+router.get('/profile/orders', isLoggedIn, validateToken, orderController.displayOrders)
+router.get('/order-detail/:id', isLoggedIn, validateToken, orderController.orderDetails)
+router.post('/order/add-review',isLoggedIn, validateToken, reviewController.addReview)
+router.get('/order/edit-review/:orderId/:productId',isLoggedIn, validateToken, reviewController.fetchReview)
+router.put('/order/edit-review',isLoggedIn, validateToken, reviewController.editReview)
+router.delete('/order/delete-review',isLoggedIn, validateToken, reviewController.deleteReview)
+router.post('/order-cancel', isLoggedIn, validateToken, orderController.cancelOrder)
+router.post('/order-return', isLoggedIn, validateToken, orderController.returnOrder)
+router.get('/profile/addresses', isLoggedIn, validateToken, addressController.displayAddress)
+router.post('/profile/add-new-address', isLoggedIn, validateToken, addressController.addAddress)
+router.get('/profile/delete-address/:userId/:addressId', isLoggedIn, validateToken, addressController.deleteAddress)
+router.get('/profile/edit-address/:userId/:addressId', isLoggedIn, validateToken, addressController.displayEditAddress)
+router.post('/profile/edit-address', isLoggedIn, validateToken, addressController.editAddress)
+router.get('/profile/change-password', isLoggedIn, validateToken, userController.displayChangePassword)
+router.post('/profile/change-password-check', isLoggedIn, validateToken, userController.checkPassword)
+router.post('/profile/change-password', isLoggedIn, validateToken, userController.changePassword)
+
+module.exports = router

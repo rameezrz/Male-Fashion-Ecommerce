@@ -1,6 +1,7 @@
 const userHelper = require("../helpers/userHelper");
 const cartHelper = require('../helpers/cartHelper')
 const productHelper = require("../helpers/productHelper");
+const variantHelper = require('../helpers/variantHelper')
 const User = require('../Models/userSchema')
 const Product = require("../Models/productSchema");
 const Category = require("../Models/categorySchema");
@@ -9,6 +10,7 @@ const Cart = require('../Models/cartSchema')
 const Wallet = require('../Models/walletSchema')
 const Address = require('../Models/addressSchema')
 const Banner = require('../Models/bannerSchema')
+const Variant = require('../Models/variantSchema')
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const verifySid = process.env.VERIFY_SID;
@@ -421,6 +423,8 @@ const displayProduct = async (req, res) => {
     const userName = isUserLoggedIn ? req.session.userName : "";
     const id = req.params.id;
     const product = await Product.findById(id);
+    const variant = await variantHelper.getVariants(id)
+    console.log(variant);
     const category = await Category.findById(product.category);
     const activeMenuItem = "/shop";
     let cartCount = 0
@@ -428,11 +432,11 @@ const displayProduct = async (req, res) => {
       cartCount = await cartHelper.getCartCount(req.session.user._id)
     }
     const review = await productHelper.getProductReviews(product._id)
-    console.log(review);
     res.render("user/productDetails", {
       userName,
       isUserLoggedIn,
       product,
+      variant,
       category,
       activeMenuItem,
       cartCount,
@@ -442,6 +446,9 @@ const displayProduct = async (req, res) => {
     console.log(error);
   }
 };
+
+
+
 
 
 

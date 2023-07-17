@@ -16,6 +16,9 @@ var cartSchema = new mongoose.Schema({
             item: {
                 type:mongoose.Schema.Types.ObjectId
             },
+            variantId: {
+                type:mongoose.Schema.Types.ObjectId
+            },
             quantity: {
                 type:Number
             }

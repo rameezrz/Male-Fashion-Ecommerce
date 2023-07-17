@@ -1736,16 +1736,7 @@ ol {
 	background: #ffffff;
 }
 
-.product__details__option__color label:after {
-	position: absolute;
-	left: -3px;
-	top: -3px;
-	height: 36px;
-	width: 36px;
-	border: 1px solid #e5e5e5;
-	content: "";
-	border-radius: 50%;
-}
+
 
 .product__details__option__color label input {
 	position: absolute;

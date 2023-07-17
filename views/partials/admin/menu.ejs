@@ -32,6 +32,22 @@
         </a>
       </li>
 
+      <!-- Products Variant -->
+      <li class="menu-item <%= activeMenuItem === '/addVariant' ? 'active' : '' %>">
+        <a href="/admin-panel/add-variant" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-share-alt"></i>
+          <div data-i18n="Analytics">Add Variant</div> 
+        </a>
+      </li>
+
+      <!-- Products with Variant -->
+      <li class="menu-item <%= activeMenuItem === '/productVariant' ? 'active' : '' %>">
+        <a href="/admin-panel/product-variants" class="menu-link">
+          <i class="menu-icon tf-icons bx bx-package"></i>
+          <div data-i18n="Analytics">Product Variants</div> 
+        </a>
+      </li>
+
       <!-- Categories -->
       <li class="menu-item <%= activeMenuItem === '/addCategories' || activeMenuItem === '/addSubCategories' ? 'active open' : '' %>">
         <a href="javascript:void(0);" class="menu-link menu-toggle">

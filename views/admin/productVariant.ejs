@@ -1,0 +1,166 @@
+<style>
+  body{
+    overflow: hidden;
+  }
+  .variant p {
+    margin-bottom: 5px;
+  }
+</style>
+<%- include('../partials/messages') %>
+  <div class="col d-flex ">
+    <div class="product-container d-flex flex-column" style="width: 100%;">
+      <div class="product-header d-flex ms-3">
+        <div class="col-6 d-flex gap-5">
+          <div>Image</div>
+          <div style="margin-left: 50px;">Product Name</div>
+        </div>
+        <div class="col-3">Brand</div>
+        <div class="col-3">Category</div>
+      </div>
+      <div class="mb-5" style="height: 610px; overflow-y: auto;">
+      <% products.forEach(product=>{ %>
+      <div class="variant-wrapper" >
+        <div class="item-container bg-white p-3 mt-3 d-flex  align-items-center gap-5">
+          <div class="col-5 d-flex gap-5 align-items-center">
+            <div>
+              <img
+                src="/admin/productImgMulter/<%= product.product.images[0].filename %>"
+                alt="" style="width: 100px;">
+            </div>
+            <div style="max-width: 250px;">
+              <p><%= product.product.productName %></p>
+            </div>
+          </div>
+          <div class="col-3 ms-5">
+            <p><%= product.product.brand %></p>
+          </div>
+          <div class="col-3 ms-n4">
+            <p><%= getCategoryName(product.product.category)%></p>
+          </div>
+        </div>
+        <div class="bg-white">
+          <p class="ms-3 ">Variants</p>
+          <hr class="mb-0 mt-n2">
+          <div class="variants d-flex flex-wrap bg-white px-3 py-3 gap-4">
+            <% product.variants.forEach(variant=>{ %>
+            <div class="variant px-3 ps-4 py-2 rounded"
+              style="background-color: rgba(105, 108, 255, 0.05);">
+              <p>Size
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+                <span class="fw-bold"><%= variant.size %></span></p>
+              <p>Color &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+                <span class="fw-bold"><%= variant.color %></span></p>
+              <p>Product Price &nbsp;&nbsp;: <span class="fw-bold"><%= variant.productPrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }) %></span></p>
+              <p>Sale Price &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <span class="fw-bold"><%= variant.salePrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }) %></span></p>
+              <p>Stock &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:
+                <span class="fw-bold"><%= variant.stock %></span></p>
+              <div class="mt-3">
+                <button class="btn btn-primary me-2 edit-btns" data-productId="<%= product._id %>" data-variantId="<%= variant._id %>" data-bs-toggle="modal" data-bs-target="#editVariantModal">Edit</button>
+                <button class="btn btn-danger delete-btns"  data-productId="<%= product.product._id %>" data-variantId="<%= variant._id %>">Delete</button>
+              </div>
+            </div>
+            <% }) %>
+            
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editVariantModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Edit Variant</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Size
+          &nbsp;:&nbsp;
+          <span class="fw-bold">S</span></p>
+        <p>Color &nbsp;:&nbsp;
+          <span class="fw-bold">Brown</span></p>
+          <form id="editVariantForm">
+            <input type="text" name="productId" id="productId" hidden>
+            <input type="text" name="variantId" id="variantId" hidden>
+        <div class="mb-3">
+          <input type="number" class="form-control" id="productPrice"  placeholder="Product Price" name="productPrice" required>
+          <small id="productPriceError" class="form-text text-danger"></small>
+        </div>
+        <div class="mb-3">
+          <input type="number" class="form-control" id="salePrice"  placeholder="Product Sale Price" name="salePrice" required>
+          <small id="salePriceError" class="form-text text-danger"></small>
+        </div>
+        <div class="mb-3">
+          <small id="stockError" class="form-text">This will increment the current stock</small>
+          <input type="number" class="form-control" id="stock"  placeholder="Product Stock" name="stock" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  //Function to Edit the variants
+  const editBtns = document.querySelectorAll('.edit-btns')
+    editBtns.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        var productId = event.target.getAttribute('data-productId')
+        var variantId = event.target.getAttribute('data-variantId')
+        
+        $.ajax({
+          url:`/admin-panel/edit-variant/${productId}/${variantId}`,
+          method: 'get',
+          success:(response)=>{
+            console.log(response);
+            document.getElementById('productPrice').value = response.variants[0].productPrice
+            document.getElementById('salePrice').value = response.variants[0].salePrice
+            document.getElementById('stock').value = response.variants[0].stock
+            document.getElementById('productId').value = response.product
+            document.getElementById('variantId').value = variantId
+          }
+        })
+        $('#editVariantForm').submit((e) => {
+          e.preventDefault()
+          $.ajax({
+            url: '/admin-panel/edit-variant',
+            method: 'put',
+            data: $('#editVariantForm').serialize(),
+            success: (response) => {
+              if(response.status){
+            location.reload()
+            }
+            }
+          })
+        })
+      })
+    })
+
+  //Function to Delete the variants
+  const deleteBtns = document.querySelectorAll('.delete-btns')
+  deleteBtns.forEach((button)=>{
+    button.addEventListener('click',(event)=>{
+      var productId = event.target.getAttribute('data-productId')
+      var variantId = event.target.getAttribute('data-variantId')
+      $.ajax({
+        url:'/admin-panel/delete-variant',
+        method:'delete',
+        data:{productId,variantId},
+        success:(response)=>{
+          if(response.status){
+            location.reload()
+          }
+        }
+      })
+    })
+  })
+</script>

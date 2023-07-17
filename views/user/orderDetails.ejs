@@ -49,15 +49,31 @@
                 </div>
                 <div class="col ms-3">
                     <h5 class="mb-2"><%= product.product.productName %></h5>
+                    <div>
+                        <% if(product.variants){ %>
+                            <div class="">
+                                <p class="mb-0">Size : <span class="fw-bold fs-6"><%= product.variants.size %></span></p>
+                                <p class="mb-0">Color : <span class="fw-bold fs-6"><%= product.variants.color %> %></p>
+                            </div>
+                            <% } %>
+                    </div>
                 </div>
                 <div class="col">
-                    <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
+                    <% if(product.variants){ %>
+                        <h5 class="fw-bold mb-2">₹ <%= product.variants.salePrice %></h5>
+                        <% }else{ %>
+                            <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice %></h5>
+                            <% } %>
                 </div>
                 <div class="col">
                     <h5 class="fw-bold mb-2"><%= product.quantity %></h5>
                 </div>
                 <div class="col">
-                    <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
+                    <% if(product.variants){ %>
+                        <h5 class="fw-bold mb-2">₹ <%= product.variants.salePrice * product.quantity %></h5>
+                        <% }else{ %>
+                            <h5 class="fw-bold mb-2">₹ <%= product.product.salePrice * product.quantity %></h5>
+                            <% } %>
                 </div>
                 <div class="col">
                     <input type="text" id="orderId" value="<%= product._id %>" hidden>
@@ -69,7 +85,7 @@
                         <% }else if(product.status==='Delivered'){ %>
                             <h5 class="fw-bold mb-2 text-success"><%= product.status %></h5>
                             <% if(!product.rating){ %>
-                            <p style="cursor: pointer;" class="text-primary addReviewBtn" data-bs-toggle="modal" data-bs-target="#reviewModal" data-product-id="<%= product.item %>">Write a review</p>
+                            <p style="cursor: pointer;" class="text-primary addReviewBtn" data-bs-toggle="modal" data-bs-target="#reviewModal" data-orderId="<%= product._id %>" data-productId="<%= product.productId %>" data-cartItem="<%= product.cartItem %>">Write a review</p>
                             <% } %>
                             <% }else{ %>
                                 <h5 class="fw-bold mb-2 text-success"><%= product.status %></h5>
@@ -77,9 +93,9 @@
                         </div>
                         <div class="col">
                             <% if(product.status==='Placed'){ %>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModal">Cancel</button>
+                        <button class="btn btn-danger cancelBtn" data-bs-toggle="modal" data-bs-target="#exampleModal" data-orderId="<%= product._id %>" data-productId="<%= product.productId %>" data-cartItem="<%= product.cartItem %>" data-variantId="<%= product.variantId %>" data-quantity="<%= product.quantity %>">Cancel</button>
                         <% }else if(product.status==='Delivered'){ %>
-                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#returnModal">Return</button>
+                            <button class="btn btn-danger returnBtn" data-bs-toggle="modal" data-bs-target="#returnModal" data-orderId="<%= product._id %>" data-productId="<%= product.productId %>" data-cartItem="<%= product.cartItem %>" data-variantId="<%= product.variantId %>" data-quantity="<%= product.quantity %>">Return</button>
                             <% }else{ %>
                             <h5 class="fw-bold mb-2">on <%= product.date.toLocaleDateString()  %></h5>
                             <% } %>
@@ -156,7 +172,7 @@
   </div>
 
 
-<!-- Modal -->
+<!-- Add Review Modal -->
 <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <style>
           .add-rating-stars {
@@ -195,8 +211,9 @@
                     <span class="add-star" data-star-index="4"><i class="fa-solid fa-star"></i></span>
                     <span class="add-star" data-star-index="5"><i class="fa-solid fa-star"></i></span>
                   </div>
-                  <input type="text" hidden name="rating" id="productRating">
-                  <input type="text" hidden name="productId" id="productId">
+                  <input type="text" hidden name="rating" id="productRatingReview">
+                  <input type="text" hidden name="productId" id="productIdReview">
+                  <input type="text" hidden name="cartItem" id="cartItemReview">
                   <input type="text" hidden name="orderId" id="orderIdReview">
               </div>
               <div class="mb-3">
@@ -212,14 +229,20 @@
       </div>
     </div>
     <script>
+            const addReviewBtns = document.querySelectorAll('.addReviewBtn')
+            addReviewBtns.forEach(function(button){
+                button.addEventListener('click',function(){
+                    document.getElementById('orderIdReview').value = this.getAttribute('data-orderid');
+                    document.getElementById('productIdReview').value = this.getAttribute('data-productid');
+                    document.getElementById('cartItemReview').value = this.getAttribute('data-cartitem');
+                })
+            })
             const addStars = document.querySelectorAll('.add-star');
-            let rating = document.getElementById('productRating')
-            const itemId = document.getElementById('itemId').value
-            const orderId = document.getElementById('orderId').value
-            document.getElementById('editProductId').value = itemId
-            document.getElementById('editOrderId').value = orderId
-            document.getElementById('productId').value = itemId
-            document.getElementById('orderIdReview').value = orderId
+            let rating = document.getElementById('productRatingReview')
+            const orderIdReview = document.getElementById('orderIdReview').value
+            const cartItemReview = document.getElementById('cartItemReview').value
+            const productIdReview = document.getElementById('productIdReview').value
+            
 
         addStars.forEach(star => {
         star.addEventListener('click', () => {
@@ -259,24 +282,30 @@
 <!--Cancel Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5 fw-bold" id="exampleModalLabel">Let us know why</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <div class="p-3">
-                <label for="exampleFormControlTextarea1" class="form-label">Reason for Cancellation <span class="text-danger">*</span></label>
-                <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5 fw-bold" id="exampleModalLabel">Let us know why</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="p-3">
+                    <input type="text" hidden id="cancelOrderId">
+                    <input type="text" hidden id="cancelProductId">
+                    <input type="text" hidden id="cancelCartItem">
+                    <input type="text" hidden id="cancelVariantId">
+                    <input type="text" hidden id="cancelQuantity">
+                    <label for="exampleFormControlTextarea1" class="form-label">Reason for Cancellation <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger" onclick="cancelOrder()">Cancel Product</button>
             </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-danger" onclick="cancelOrder()">Cancel Product</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
+
 
   <!--Return Modal -->
 <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -288,6 +317,11 @@
         </div>
         <div class="modal-body">
             <div class="p-3">
+                    <input type="text" hidden id="returnOrderId">
+                    <input type="text" hidden id="returnProductId">
+                    <input type="text" hidden id="returnCartItem">
+                    <input type="text" hidden id="returnVariantId">
+                    <input type="text" hidden id="returnQuantity">
                 <label for="returnReason" class="form-label">Reason for Return <span class="text-danger">*</span></label>
                 <textarea class="form-control" id="returnReason" rows="3" required></textarea>
             </div>
@@ -375,31 +409,62 @@ editButtons.forEach(function (button) {
         })
     }
 
+    
+    
+    // -------------------- Cancel Order ------------------------
+        const cancelBtns = document.querySelectorAll('.cancelBtn')
+        cancelBtns.forEach(function(button) {
+            button.addEventListener('click',function(){
+                document.getElementById('cancelOrderId').value = this.getAttribute('data-orderid');
+                document.getElementById('cancelProductId').value = this.getAttribute('data-productid');
+                document.getElementById('cancelCartItem').value = this.getAttribute('data-cartitem');
+                document.getElementById('cancelVariantId').value = this.getAttribute('data-variantid');
+                document.getElementById('cancelQuantity').value = this.getAttribute('data-quantity');
+            })
+        });
+
     const cancelOrder = ()=>{
-        const orderId = document.getElementById('orderId').value
-        const itemId = document.getElementById('itemId').value
-        const quantity = document.getElementById('quantity').value
+        const orderId = document.getElementById('cancelOrderId').value
+        const productId = document.getElementById('cancelProductId').value
+        const cartItem = document.getElementById('cancelCartItem').value
+        const variantId = document.getElementById('cancelVariantId').value
+        const quantity = document.getElementById('cancelQuantity').value
         const reason = document.getElementById('exampleFormControlTextarea1').value
         $.ajax({
             url:'/order-cancel',
             method:'post',
-            data:{orderId,itemId,reason,quantity},
+            data:{orderId,productId,cartItem,variantId,reason,quantity},
             success:(response)=>{
                 location.reload()
             }
         })
     }
 
+
+    // -------------------- Return Order ------------------------
+    const returnBtns = document.querySelectorAll('.returnBtn')
+        returnBtns.forEach(function(button) {
+            button.addEventListener('click',function(){
+                document.getElementById('returnOrderId').value = this.getAttribute('data-orderid');
+                document.getElementById('returnProductId').value = this.getAttribute('data-productid');
+                document.getElementById('returnCartItem').value = this.getAttribute('data-cartitem');
+                document.getElementById('returnVariantId').value = this.getAttribute('data-variantid');
+                document.getElementById('returnQuantity').value = this.getAttribute('data-quantity');
+            })
+        });
+    
+
     const returnOrder = ()=>{
-        console.log('hello');
-        const orderId = document.getElementById('orderId').value
-        const itemId = document.getElementById('itemId').value
-        const quantity = document.getElementById('quantity').value
+        const orderId = document.getElementById('returnOrderId').value
+        const productId = document.getElementById('returnProductId').value
+        const cartItem = document.getElementById('returnCartItem').value
+        const variantId = document.getElementById('returnVariantId').value
+        const quantity = document.getElementById('returnQuantity').value
         const reason = document.getElementById('returnReason').value
         $.ajax({
             url:'/order-return',
             method:'post',
-            data:{orderId,itemId,reason,quantity},
+            data:{orderId,productId,cartItem,variantId,reason,quantity},
             success:(response)=>{
                 location.reload()
             }

@@ -26,8 +26,22 @@
   background-color: #555; /* Set the color of the scroll bar thumb on hover */
 }
 
+input {
+    display: none;
+  }
 
-
+label {
+  border: 1px solid #111111;
+  padding: 5px;
+}
+/* Style the label element when the input element is checked */
+input:checked + label {
+  scale: 120%;
+    border: 2px solid black;
+    /* Change the border color to white */
+    /* Add a box shadow effect */
+    box-shadow: 0 0 10px white;
+  }
 </style>
 
 <section class="shop-details">
@@ -78,16 +92,40 @@
               <%= product.productName %>
             </h4>
 
-            <h3 class="d-inline">₹<%= product.salePrice %>
+            <h3 class="d-inline" id="salePrice"><%= product.salePrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }) %>
             </h3>
-            <p style="color: #b19975;" class="text-decoration-line-through d-inline">₹<%= product.productPrice %>
+            <p style="color: #b19975;" class="text-decoration-line-through d-inline" id="productPrice"><%= product.productPrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }) %>
             </p>
-
-            <div class="product__details__option">
-
-
+            <input type="text" id="variantId" hidden>
+            <input type="text" hidden id="isUserSelected" value="true">
+            
+            <% if(variant.sizes.length>0){ %>
+              <input type="text" hidden id="isVariant" value="true">
+            <div class="product__details__option d-flex flex-column align-items-center mt-3">
+              <div class="product__details__option__size me-0">
+                <span>Size:</span>
+                <fieldset id="variantSize">
+                  <% variant.sizes.forEach(variant=>{ %>
+                <label for="<%= variant %>"><%= variant %>
+                    <input type="radio" id="<%= variant %>" name="size" value="<%= variant %>">
+                </label>
+                <% }) %>
+              </fieldset>
             </div>
-            <div class="product__details__cart__option">
+            <div class="product__details__option__color mt-3">
+              <span>Color:</span>
+              <fieldset id="variantColor">
+                <% variant.colors.forEach(color => { %>
+                  <input type="radio" id="<%= color %>" name="color" value="<%= color %>">
+                  <label class="c-1" for="<%= color %>" style="background: <%= color %>"></label>
+                  <span><%= color %></span>
+                  <% }) %>
+            </fieldset>
+          </div>
+            </div>
+            <% } %>
+            <p id="selectionError" class="text-danger d-none">Size and color not selected</p>
+            <div class="product__details__cart__option mt-3">
               <a href="" onclick="addToCart('<%= product._id%>'), event.preventDefault()" class="primary-btn">add to cart</a>
               <a href="" onclick="addToWishlist('<%= product._id%>'), event.preventDefault()" class="text-dark mt-3 d-block"><i class="fa fa-heart"></i> add to wishlist</a>
             </div>
@@ -188,6 +226,95 @@
 
 
 
+<script>
+
+$(document).ready(()=>{
+  const isVariant = document.getElementById('isVariant').value
+  if(isVariant==='true'){
+  document.getElementById('isUserSelected').value = false
+}
+})
+
+   //Change price based on color which user selected
+//---------------------------------------------------------------------------
+$(document).on("click", "input[name='color']", function() {
+    //Get the product id from the product object
+    const productId = "<%= product._id %>";
+    //Get the selected color from the radio button value
+    const selectedColor = $(this).val();
+    //Get the selected size from the checked size radio button value
+    const selectedSize = $("input[name='size']:checked").val();
+    //Send an AJAX request to the backend with the product id, the selected size and the selected color as parameters
+    $.ajax({
+      url: '/shop/products/get-variant',
+      type: "GET",
+      data: { productId, selectedSize, selectedColor },
+      success: function(data) {
+        //The data parameter should be the variant object that matches the selected size and color
+        //Update the salePrice and productPrice elements with the data values
+        $("#salePrice").text(data.salePrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }));
+        $("#productPrice").text(data.productPrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }));
+        //Store the variant id in a hidden input element for future use
+        $("#variantId").val(data._id);
+        document.getElementById('isUserSelected').value = true
+      },
+      error: function(error) {
+        //Handle any error that may occur
+        console.log(error);
+      }
+    });
+  });
+
+  //display colors based on size which user selected
+//---------------------------------------------------------------------------
+  //Select the size radio buttons
+  const sizeRadioButtons = $("input[name='size']");
+  //Add a click event listener to each radio button
+  sizeRadioButtons.click(function() {
+    //Get the product id from the product object
+    const productId = "<%= product._id %>";
+    //Get the selected size from the radio button value
+    const selectedSize = $(this).val();
+    //Send an AJAX request to the backend with the product id and the selected size as parameters
+    $.ajax({
+      url: '/shop/products/get-colors-by-size',
+      type: "GET",
+      data: { productId, selectedSize },
+      success: function(data) {
+        console.log(data);
+        //The data parameter should be an array of colors that match the selected size
+        //Clear the existing color radio buttons
+        $("input[name='color']").remove();
+        //Loop through the data array and create new color radio buttons
+        $("#variantColor").empty();
+        data.forEach(element=>{
+          //Create an input element with the type, id, name and value attributes
+          let input = $("<input></input>").attr("type", "radio").attr("id", element.color).attr("name", "color").attr("value", element.color);
+          //Create a label element with the for attribute and style
+          let label = $("<label></label>").attr("for", element.color).css("background", element.color);
+          let span = $("<span></span>").html(element.color)
+          //Append the input element to the fieldset element
+          $("#variantColor").append(input);
+          //Append the label element to the fieldset element
+          $("#variantColor").append(label);
+          $("#variantColor").append(span);
+        })
+        $("#salePrice").text(data[0].salePrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }));
+        $("#productPrice").text(data[0].productPrice.toLocaleString(undefined, { style: 'currency', currency: 'INR' }));
+        //Store the variant id in a hidden input element for future use
+        $("#variantId").val(data[0]._id);
+        document.getElementById('isUserSelected').value = true
+        document.getElementById('selectionError').classList.add('d-none')
+      },
+      error: function(error) {
+        //Handle any error that may occur
+        console.log(error);
+      }
+    });
+  });
+</script>
+
+
 
 
 <script>
@@ -207,10 +334,16 @@
   });
 
     function addToCart(productId){
+      const isSelected = document.getElementById('isUserSelected').value
+      console.log(isSelected);
+      if(isSelected==='false'){
+        document.getElementById('selectionError').classList.remove('d-none')
+      }else{
         let cartCount = document.getElementById('cartCount')
+        let variantId = document.getElementById('variantId').value
         $.ajax({
             url:'/add-to-cart',
-            data:{productId},
+            data:{productId,variantId},
             method:'post',
             success:(response)=>{
               if(response.status){
@@ -224,6 +357,7 @@
                     }
             }
         })
+      }
     }
 
     const addToWishlist = (productId)=>{

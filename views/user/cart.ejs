@@ -32,7 +32,7 @@
 </section>
 <!-- Breadcrumb Section End -->
 
-<% if(products.length === 0){ %>
+<% if(cartItems.length === 0){ %>
     <div class="container d-flex flex-column align-items-center py-5">
         <img class="py-5" width="200px" src="/user/img/shopping-cart/empty-box.gif" alt="">
         <h4>Oops! Cart Empty</h4>
@@ -55,25 +55,42 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% products.forEach((products, index) => { %>
+                            <% cartItems.forEach((products, index) => { %>
                                 <tr>
-                                  <td class="product__cart__item">
+                                  <td class="product__cart__item d-flex align-items-center py-4">
                                       <div class="product__cart__item__pic">
                                         <a href="/shop/product/<%= products.product._id %>"><img style="width: 70px;" src="/admin/productImgMulter/<%= products.product.images[0].filename  %>" alt=""></a>
                                       </div>
-                                      <div class="product__cart__item__text">
-                                        <a href="/shop/product/<%= products.product._id %>"><h6 style="max-width: 250px;"><%= products.product.productName %></h6></a>
-                                        <h5 class="d-inline">₹ <h5 class="d-inline" id="productPrice_<%= products.product._id %>"><%= products.product.salePrice %></h5></h5>
+                                      <div class="d-flex flex-column">
+                                        <div class="product__cart__item__text">
+                                            <a href="/shop/product/<%= products.product._id %>"><h6 style="max-width: 250px;"><%= products.product.productName %></h6></a>
+                                            <% if(products.variants){ %>
+                                                <h5 class="d-inline">₹ <h5 class="d-inline" id="productPrice_<%= products.cartItem %>"><%= products.variants.salePrice %></h5></h5>
+                                                <% }else{ %>
+                                                    <h5 class="d-inline">₹ <h5 class="d-inline" id="productPrice_<%= products.cartItem %>"><%= products.product.salePrice %></h5></h5>
+                                                    <% } %>
+                                        </div>
+                                        <% if(products.variants){ %>
+                                            <div class="d-flex gap-3">
+                                                <p>Size : <span class="fw-bold fs-6"><%= products.variants.size %></span></p>
+                                                <p>Color : <span class="fw-bold fs-6"><%= products.variants.color %> %></p>
+                                            </div>
+                                            <% } %>
                                       </div>
+                                      
                                   </td>
-                                  <td class="quantity__item">
-                                        <button class="btn btn-customized me-2" id="btn_<%=products.product._id  %>" onclick="changeProductQuantity('<%= products._id%>', '<%=products.product._id%>',-1)">-</button>
-                                        <span id="<%= products.product._id %>"><%= products.quantity %></span> 
-                                        <button class="btn btn-customized ms-2" onclick="changeProductQuantity('<%= products._id%>', '<%=products.product._id%>',1)">+</button>
-                                        <span class="d-block text-danger mt-2" id="error_<%= products.product._id %>"></span>
-                                  </td>
-                                  <td class="cart__price">₹ <h5 class="d-inline" id="total_<%= products.product._id %>"><%= products.product.salePrice * products.quantity  %></h5></td>
-                                  <td class="cart__close"><a href="#" data-toggle="modal" data-target="#success_tic" onclick="removeProduct('<%=products._id %>','<%=products.product._id %>')"><i class="fa fa-close"></i></a></td>
+                                    <td class="quantity__item" >
+                                        <button class="btn btn-customized me-2" id="btn_<%=products.cartItem  %>" data-variant="<%= products.variantId %>" onclick="changeProductQuantity('<%= products._id%>', '<%=products.product._id%>',-1,'<%=products.cartItem%>',this)">-</button>
+                                        <span id="<%= products.cartItem %>"><%= products.quantity %></span> 
+                                        <button class="btn btn-customized ms-2" data-variant="<%= products.variantId %>" onclick="changeProductQuantity('<%= products._id%>', '<%=products.product._id%>',1,'<%=products.cartItem%>',this)">+</button>
+                                        <span class="d-block text-danger mt-2" id="error_<%= products.cartItem %>"></span>
+                                    </td>
+                                    <% if(products.variants){ %>
+                                        <td class="cart__price">₹ <h5 class="d-inline" id="total_<%= products.cartItem %>"><%= products.variants.salePrice * products.quantity  %></h5></td>
+                                        <% }else{ %>
+                                            <td class="cart__price">₹ <h5 class="d-inline" id="total_<%= products.cartItem %>"><%= products.product.salePrice * products.quantity  %></h5></td>
+                                            <% } %>
+                                  <td class="cart__close"><a href="#" data-toggle="modal" data-target="#success_tic" onclick="removeProduct('<%=products._id %>','<%=products.cartItem %>')"><i class="fa fa-close"></i></a></td>
                                 </tr>
                               <% }) %>
                         </tbody>
@@ -132,30 +149,31 @@
 
 <script>
 
-    function changeProductQuantity(cartId,productId,count){
+    function changeProductQuantity(cartId,productId,count,cartItem,button){
         count = parseInt(count)
-        let quantity = parseInt(document.getElementById(productId).innerHTML)
+        let quantity = parseInt(document.getElementById(cartItem).innerHTML)
+        var variantId = $(button).data("variant");
         $.ajax({
             url:'/change-product-quantity',
-            data:{cartId,productId,count,quantity},
+            data:{cartId,productId,count,quantity,variantId},
             method:'post',
             success:(response)=>{
                 console.log(response);
                 if(response.productQuantity.cannotDelete){
-                    const btn = document.getElementById('btn_'+productId)
+                    const btn = document.getElementById('btn_'+cartItem)
                     btn.classList.add('disabled')
                 }else if(response.productQuantity.limitExceed){
-                    const error = document.getElementById('error_'+productId)
+                    const error = document.getElementById('error_'+cartItem)
                     error.innerHTML = "Max Limit Exceeded"
                 }else{
-                    const error = document.getElementById('error_'+productId)
+                    const error = document.getElementById('error_'+cartItem)
                     error.innerHTML = ""
-                    const btn = document.getElementById('btn_'+productId)
+                    const btn = document.getElementById('btn_'+cartItem)
                     btn.classList.remove('disabled')
-                document.getElementById(productId).innerHTML = response.productQuantity
+                document.getElementById(cartItem).innerHTML = response.productQuantity
                 document.getElementById('totalAmount2').innerHTML = response.totalAmount
-                var totalPriceElement = document.getElementById("total_" + productId);
-                var salePrice = parseFloat(document.getElementById('productPrice_'+productId).innerHTML);
+                var totalPriceElement = document.getElementById("total_" + cartItem);
+                var salePrice = parseFloat(document.getElementById('productPrice_'+cartItem).innerHTML);
                 var newTotalPrice = (salePrice * response.productQuantity);
                 totalPriceElement.innerHTML = newTotalPrice;
             }
@@ -163,10 +181,10 @@
         })
     }
 
-    function removeProduct(cartId,productId){
+    function removeProduct(cartId,cartItem){
         $.ajax({
             url:'/remove-product',
-            data:{cartId,productId},
+            data:{cartId,cartItem},
             method:'post',
             success:(response)=>{
                 setTimeout(()=>{
