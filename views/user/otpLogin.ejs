@@ -38,6 +38,7 @@
                                                 <button class="btn btn-dark ms-3" onclick="sendOtp()" id="resendLink">Send</button>
 
                                         </div>
+                                        <p class="text-danger mt-n3 d-none" id="mobileError">Mobile Number not registered.</p>
                                     </div>
                                     <form action="/check-login-otp" method="post" class="px-5">
                                         <div class="form-outline mb-3">
@@ -79,35 +80,38 @@
         var timer = 60; // Time in seconds
         var countdown = document.getElementById("resendLink");
         var phone = document.getElementById('phone').value
-        console.log(phone);
         $.ajax({
             url: '/send-otp',
             method: 'POST',
             data: { phone },
             success: (response) => {
                 console.log(response);
+                if(!response){
+                    document.getElementById('mobileError').classList.remove('d-none')
+                }else{
+                    document.getElementById('mobileError').classList.add('d-none')
+                    function startTimer() {
+                    countdown.innerHTML = timer + "s";
+                    timer--;
+                    
+                    if (timer < 0) {
+                        countdown.innerHTML = "Resend";
+                        countdown.classList.remove("disabled");
+                        clearInterval(interval);
+                    }
+                }
+                if (!countdown.classList.contains("disabled")) {
+                countdown.classList.add("disabled");
+                timer = 60;
+                startTimer();
+                var interval = setInterval(startTimer, 1000);
             }
-        })
-
-        function startTimer() {
-        countdown.innerHTML = timer + "s";
-        timer--;
-        
-        if (timer < 0) {
-            countdown.innerHTML = "Resend";
-            countdown.classList.remove("disabled");
-            clearInterval(interval);
+            }
         }
-    }
-    if (!countdown.classList.contains("disabled")) {
-            countdown.classList.add("disabled");
-            timer = 60;
-            startTimer();
-            var interval = setInterval(startTimer, 1000);
-        }
-        
+    })
+}
 
-    }
+    
 
 </script>
 

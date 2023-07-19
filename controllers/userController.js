@@ -109,12 +109,18 @@ const displayOtpLogin = (req, res) => {
 
 
 //Sending OTP to User Mobile
-const sendOtp = (req, res) => {
+const sendOtp = async(req, res) => {
   try {
     const mob = req.body.phone
-    req.session.phone = mob
-    userHelper.sendOtp(mob);
-    res.json('Otp sent')
+    const isUser = await User.findOne({ phone: mob })
+    console.log(isUser);
+    if (isUser) {
+      req.session.phone = mob
+      userHelper.sendOtp(mob);
+      res.json(true)
+    } else {
+      res.json(false)
+    }
   } catch (error) {
     console.log(error);
   }
