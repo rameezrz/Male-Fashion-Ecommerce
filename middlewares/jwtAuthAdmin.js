@@ -1,7 +1,7 @@
 const { verify } = require('jsonwebtoken')
 
 const validateToken = (req, res, next) => {
-    const accessToken = req.cookies['jwtToken']
+    const accessToken = req.cookies['jwtTokenAdmin']
 
     if (!accessToken) {
         req.flash("errorMsg", "Not Authenticated")

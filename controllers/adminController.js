@@ -53,7 +53,7 @@ const postLogin = async (req, res) => {
         let maxAge = 60 * 60 * 24 * 3 * 1000;
         const accessToken = createJwtToken(admin);
         req.session.admin=admin
-        res.cookie("jwtToken", accessToken, { maxAge, httpOnly: true });
+        res.cookie("jwtTokenAdmin", accessToken, { maxAge, httpOnly: true });
         req.flash("successMsg", "Login Successful");
         res.redirect("/admin-panel");
       }
@@ -600,8 +600,7 @@ const customSalesReport = async (req, res) => {
 //Admin Logout
 const logout = (req, res) => {
   try {
-    res.clearCookie("jwtToken");
-    req.session.destroy();
+    res.clearCookie("jwtTokenAdmin");
     res.redirect("/admin-panel/login");
   } catch (error) {
     console.log(error);
